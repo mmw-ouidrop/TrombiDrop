@@ -68,8 +68,9 @@
         .high-score { background: var(--warning); color: var(--dark); padding: 5px 12px; border-radius: 20px; font-weight: 600;}
 
         /* --- DESIGN DU JEU --- */
-        #game-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 600; font-size: 1.3rem; color: var(--primary);}
+        #game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: 600; font-size: 1.3rem; color: var(--primary);}
         .lives-display { color: var(--danger); font-size: 1.3rem; letter-spacing: 2px;}
+        .score-display { display: flex; gap: 15px; background: var(--surface2); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--border);}
         
         .photo-container { width: 160px; height: 160px; margin: 0 auto 20px auto; border-radius: 50%; overflow: hidden; border: 4px solid var(--primary); background-color: #ddd;}
         .photo-container img { width: 100%; height: 100%; object-fit: cover; }
@@ -124,6 +125,7 @@
             .grid-qcm, .grid-cards { grid-template-columns: 1fr; }
             h1 { font-size: 2.5rem; }
             .container { padding: 20px; }
+            .score-display { font-size: 1rem; }
         }
     </style>
 </head>
@@ -157,7 +159,10 @@
         <div id="game-header">
             <span id="game-mode-title">Mode</span>
             <span id="lives-display" class="lives-display">❤️❤️❤️</span>
-            <span>Score: <span id="current-score">0</span></span>
+            <div class="score-display">
+                <span style="color: var(--primary-light);">⏱️ <b id="timer-live">00:00</b></span>
+                <span>Score: <b id="current-score">0</b></span>
+            </div>
         </div>
         <div id="question-display"></div>
         <div id="feedback-container" class="hidden feedback-area"></div>
@@ -181,14 +186,19 @@
             { id: 7, title: "7. Mixte 4 : Service ➔ Liste", desc: "Cochez les membres du service dans la liste." }
         ];
 
+        // Format du localStorage pour supporter le timer : { "1": { score: 10, time: 45 }, "2": ... }
         let highScores = JSON.parse(localStorage.getItem('trombiScoresOuidrop')) || {};
         let currentMode = null; 
         let questions = []; 
         let currentIndex = 0; 
         
         let scoreSession = 0; 
-        let vies = 3; // 3 chances par partie
-        let currentExpectedPts = 0; // Calculé à chaque question selon le mode
+        let vies = 3; 
+        let currentExpectedPts = 0; 
+
+        // Variables du Timer
+        let timeSeconds = 0;
+        let timerInterval = null;
 
         // --- CHARGEMENT ET AUTO-LOGIN ---
         async function fetchEncryptedFile() {
@@ -197,11 +207,10 @@
                 if (!response.ok) throw new Error("Fichier introuvable HTTP: " + response.status);
                 encryptedDataText = await response.text();
                 
-                // Tentative d'auto-login si le mot de passe est enregistré
                 const savedPwd = localStorage.getItem('ouidrop_pwd');
                 if (savedPwd) {
                     document.getElementById('secret-password').value = savedPwd;
-                    handleLogin(true); // true = connexion automatique
+                    handleLogin(true);
                 }
             } catch (e) {
                 console.error(e);
@@ -213,7 +222,6 @@
             }
         }
 
-        // --- GESTION DU LOGIN ---
         function handleLogin(isAutoLogin = false) {
             const password = document.getElementById('secret-password').value;
             const errorLabel = document.getElementById('login-error');
@@ -231,13 +239,10 @@
 
                 donneesAnnuaire = JSON.parse(decryptedText);
                 
-                // Si succès, on enregistre le mot de passe pour la prochaine fois
                 localStorage.setItem('ouidrop_pwd', password);
-                
                 document.getElementById('login-screen').classList.add('hidden');
                 initMenu();
             } catch (error) {
-                // Si l'auto-login échoue (mot de passe changé/faux), on supprime la trace
                 localStorage.removeItem('ouidrop_pwd');
                 document.getElementById('secret-password').value = "";
                 if(!isAutoLogin) {
@@ -256,18 +261,59 @@
             document.getElementById('login-error').classList.add('hidden');
         }
 
+        // --- TIMER FUNCTIONS ---
+        function startTimer() {
+            timeSeconds = 0;
+            updateTimerDisplay();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function formatTime(totalSeconds) {
+            if (totalSeconds === Infinity || totalSeconds === undefined) return "--:--";
+            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const s = String(totalSeconds % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateTimerDisplay() {
+            const el = document.getElementById('timer-live');
+            if (el) el.textContent = formatTime(timeSeconds);
+        }
+
         // --- LOGIQUE DE JEU ---
         function initMenu() {
             document.getElementById('menu-screen').classList.remove('hidden');
             document.getElementById('game-screen').classList.add('hidden');
             const list = document.getElementById('mode-list');
             list.innerHTML = "";
+            
             MODES.forEach(m => {
-                const maxScore = highScores[m.id] || 0;
+                let maxScore = 0;
+                let timeStr = "";
+                
+                // Rétrocompatibilité (Si l'ancien score était juste un nombre)
+                let rec = highScores[m.id];
+                if (rec) {
+                    if (typeof rec === 'number') {
+                        maxScore = rec;
+                    } else {
+                        maxScore = rec.score;
+                        if(rec.time) timeStr = ` <span style="font-weight:400; opacity:0.8;">(${formatTime(rec.time)})</span>`;
+                    }
+                }
+
                 list.innerHTML += `
                     <div class="mode-btn" onclick="startGame(${m.id})">
                         <div><strong>${m.title}</strong><small>${m.desc}</small></div>
-                        <span class="high-score">Record: ${maxScore} pts</span>
+                        <span class="high-score">Record: ${maxScore} pts${timeStr}</span>
                     </div>`;
             });
         }
@@ -284,66 +330,89 @@
             currentIndex = 0;
             
             updateScoreDisplay();
+            startTimer(); // Démarrage du chrono !
             renderQuestion();
         }
 
         function returnToMenu() {
-            if (scoreSession > (highScores[currentMode.id] || 0)) {
-                highScores[currentMode.id] = scoreSession;
-                localStorage.setItem('trombiScoresOuidrop', JSON.stringify(highScores));
-            }
+            stopTimer();
             initMenu();
         }
 
         // --- FONCTIONS UTILITAIRES ---
-        // Le paramètre "pic" doit contenir le nom de votre fichier d'image local (ex: arthur_fosc.jpg)
         const getAvatar = (name, pic) => pic ? `./pictures/${pic}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=160&background=20294E&color=fff`;
-        const shuffle = (array) => array.sort(() => Math.random() - 0.5);
         const normalizeStr = (str) => !str ? "" : str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
-        
         const formatDate = (isoString) => { 
             if(!isoString) return ""; 
             const d = new Date(isoString); 
             return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}`; 
         };
-        
         const getUniqueVals = (key) => [...new Set(donneesAnnuaire.map(d => d.item[key]))];
+
+        // Nouvel algorithme de mélange Strict (Fisher-Yates) impartial
+        function shuffle(array) {
+            let arr = [...array];
+            let currentIndex = arr.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+            }
+            return arr;
+        }
 
         function generateQuestionsForMode(modeId) {
             let q = [...donneesAnnuaire]; 
-            shuffle(q);
+            q = shuffle(q);
             
             if (modeId === 5) {
                 const pairs = [...new Set(donneesAnnuaire.map(d => d.item.fonction + "|||" + d.item.service))];
-                return pairs.map(p => ({ type: 'pair', val: p })).sort(() => Math.random() - 0.5);
+                return shuffle(pairs.map(p => ({ type: 'pair', val: p })));
             }
             if (modeId === 6 || modeId === 7) {
-                return getUniqueVals('service').map(s => ({ type: 'service', val: s })).sort(() => Math.random() - 0.5);
+                return shuffle(getUniqueVals('service').map(s => ({ type: 'service', val: s })));
             }
             return q;
         }
 
         // --- RENDU DES QUESTIONS ---
         function renderQuestion() {
-            // Fin du jeu par épuisement des questions ou par épuisement des vies
             if (currentIndex >= questions.length || vies <= 0) {
-                const isNewRecord = scoreSession > (highScores[currentMode.id] || 0);
+                stopTimer(); // On arrête le chrono
+                
+                // --- Logique de sauvegarde du record avec prise en compte du temps ---
+                let currentBest = highScores[currentMode.id];
+                let bestScore = 0;
+                let bestTime = Infinity;
+
+                if (currentBest) {
+                    if (typeof currentBest === 'number') {
+                        bestScore = currentBest;
+                    } else {
+                        bestScore = currentBest.score;
+                        bestTime = currentBest.time || Infinity;
+                    }
+                }
+
+                let isNewRecord = false;
+                // C'est un record si le score est plus grand, OU si le score est égal mais que le temps est inférieur
+                if (scoreSession > bestScore || (scoreSession === bestScore && timeSeconds < bestTime && scoreSession > 0)) {
+                    isNewRecord = true;
+                    highScores[currentMode.id] = { score: scoreSession, time: timeSeconds };
+                    localStorage.setItem('trombiScoresOuidrop', JSON.stringify(highScores));
+                }
+                
                 const recordMsg = isNewRecord ? "<br>🏆 NOUVEAU RECORD !" : "";
+                const timeString = formatTime(timeSeconds);
                 
                 document.getElementById('question-display').innerHTML = `
                     <h3 style="text-align:center; color:var(--primary);">
                         ${vies <= 0 ? "💔 GAME OVER" : "🎉 C'EST UN SANS FAUTE !"}
-                        <br><br> Score final : ${scoreSession} point(s) ${recordMsg}
+                        <br><br> Score final : ${scoreSession} point(s) en ${timeString} ${recordMsg}
                     </h3>`;
                 
                 document.getElementById('btn-validate').classList.add('hidden'); 
                 document.getElementById('btn-next').classList.add('hidden');
-                
-                // Sauvegarde immédiate du record à la fin
-                if (isNewRecord) {
-                    highScores[currentMode.id] = scoreSession;
-                    localStorage.setItem('trombiScoresOuidrop', JSON.stringify(highScores));
-                }
                 return;
             }
             
@@ -356,13 +425,14 @@
             
             let html = ""; 
             let p = target.item;
-            currentExpectedPts = 0; // Réinitialisation des points attendus
+            currentExpectedPts = 0; 
 
             switch (currentMode.id) {
                 case 1:
-                    let optionsM1 = [p.name]; 
                     let autresM1 = shuffle(donneesAnnuaire.filter(d => d.item.id !== p.id).map(d => d.item.name)).slice(0,3);
-                    optionsM1 = shuffle(optionsM1.concat(autresM1));
+                    // On fusionne proprement dans un seul tableau avant de le mélanger avec Fisher-Yates
+                    let optionsM1 = shuffle([p.name, ...autresM1]);
+                    
                     html = `
                         <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="grid-qcm">
@@ -395,8 +465,9 @@
                     break;
                     
                 case 4:
-                    let optF = shuffle([p.fonction].concat(shuffle(getUniqueVals('fonction').filter(f=>f!==p.fonction)).slice(0,3)));
-                    let optS = shuffle([p.service].concat(shuffle(getUniqueVals('service').filter(s=>s!==p.service)).slice(0,3)));
+                    let optF = shuffle([p.fonction, ...shuffle(getUniqueVals('fonction').filter(f=>f!==p.fonction)).slice(0,3)]);
+                    let optS = shuffle([p.service, ...shuffle(getUniqueVals('service').filter(s=>s!==p.service)).slice(0,3)]);
+                    
                     html = `
                         <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="question-text">${p.name}</div>
@@ -479,7 +550,11 @@
             
             if (currentMode.id === 1) {
                 const sel = document.querySelector('.select-one.selected'); 
-                if(!sel) return alert("Sélectionnez une réponse !");
+                if(!sel) {
+                    alert("Sélectionnez une réponse !");
+                    document.getElementById('btn-validate').classList.remove('hidden');
+                    return;
+                }
                 
                 document.querySelectorAll('.select-one').forEach(b => { 
                     b.disabled = true; 
@@ -518,7 +593,12 @@
                 const fSel = document.querySelector('.sel-f.selected'); 
                 const sSel = document.querySelector('.sel-s.selected');
                 
-                if(!fSel || !sSel) return alert("Sélectionnez une fonction et un service !");
+                if(!fSel || !sSel) {
+                    alert("Sélectionnez une fonction et un service !");
+                    document.getElementById('btn-validate').classList.remove('hidden');
+                    return;
+                }
+
                 document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
                 
                 if(fSel.innerText === p.fonction) { ptsGained++; fSel.classList.add('correct'); } else fSel.classList.add('wrong');
@@ -538,7 +618,7 @@
                     else if (!isSelected && isExpected) c.classList.add('missed');
                 });
                 
-                if(expectedNum === 0 && ptsGained === 0) ptsGained = 1; // Validation du vide
+                if(expectedNum === 0 && ptsGained === 0) ptsGained = 1; 
                 
             } else if (currentMode.id === 7) {
                 let emptyValidation = true;
@@ -560,10 +640,8 @@
                 if(expectedNum === 0 && emptyValidation) ptsGained = 1;
             }
 
-            // Mettre à jour le score global
             scoreSession += ptsGained; 
 
-            // Gestion de la pénalité (les vies)
             const isPerfect = (ptsGained === currentExpectedPts);
             if (!isPerfect) {
                 vies--;
@@ -579,7 +657,6 @@
             fb.className = "feedback-area " + (isPerfect ? "success" : "error"); 
             fb.classList.remove('hidden');
             
-            // Si le joueur n'a plus de vie, on change l'intitulé du bouton
             if(vies <= 0) {
                 document.getElementById('btn-next').innerText = "Voir les résultats ➔";
             } else {
@@ -597,14 +674,12 @@
         function updateScoreDisplay() { 
             document.getElementById('current-score').innerText = scoreSession; 
             
-            // Mise à jour de l'affichage des cœurs
             let hearts = "";
             for(let i = 0; i < vies; i++) hearts += "❤️";
-            for(let i = vies; i < 3; i++) hearts += "🖤"; // Cœur vide pour les vies perdues
+            for(let i = vies; i < 3; i++) hearts += "🖤"; 
             document.getElementById('lives-display').innerText = hearts;
         }
 
-        // Lancement au démarrage de la page
         window.onload = fetchEncryptedFile;
     </script>
 </body>
