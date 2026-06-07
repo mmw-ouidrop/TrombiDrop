@@ -3,174 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OUIDROP - Trombinoscope</title>
+    <title>OUIDROP - Connexion & Jeu</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
     <style>
         :root {
-            /* Couleurs extraites de la charte graphique OUIDROP */
-            --primary: #20294E;       /* Bleu Nuit */
+            --primary: #20294E;       /* Bleu Nuit OUIDROP */
             --primary-light: #82BEE9; /* Bleu Clair */
             --success: #43B38A;       /* Vert */
             --danger: #EC7C7C;        /* Rouge/Corail */
-            --warning: #DDDABF;       /* Beige/Sable */
-            --dark: #000000;          /* Noir */
+            --warning: #DDDABF;       /* Beige */
+            --dark: #000000;          
             --light: #f8fafc;
             --gray: #cbd5e1;
         }
 
         body {
-            /* Utilisation de la typographie officielle */
             font-family: 'Saira Condensed', system-ui, sans-serif;
             background-color: var(--light);
             color: var(--dark); 
-            margin: 0; 
-            padding: 20px; 
-            display: flex;
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh;
+            margin: 0; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
 
-        /* --- EN-TÊTE OUIDROP --- */
         header { text-align: center; margin-bottom: 25px; }
-        h1 { 
-            margin: 0; 
-            font-size: 3rem; 
-            font-weight: 700; 
-            color: var(--primary); 
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .baseline { 
-            margin: 0; 
-            font-size: 1.2rem; 
-            color: var(--dark); 
-            letter-spacing: 2px;
-        }
-        .subtitle { 
-            color: #64748b; 
-            margin-top: 10px; 
-            font-size: 1.1rem;
-        }
+        h1 { margin: 0; font-size: 3rem; font-weight: 700; color: var(--primary); letter-spacing: 1px; text-transform: uppercase;}
+        .baseline { margin: 0; font-size: 1.2rem; color: var(--dark); letter-spacing: 2px;}
 
         .container {
-            background: white; 
-            padding: 30px; 
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(32, 41, 78, 0.1); /* Ombre aux tons Bleu Nuit */
-            width: 100%; 
-            max-width: 600px;
+            background: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(32, 41, 78, 0.1); width: 100%; max-width: 600px;
+            box-sizing: border-box;
+            position: relative;
         }
 
+        .hidden { display: none !important; }
+
+        /* --- FORMULAIRE DE LOGIN --- */
+        .login-box { text-align: center; }
+        .login-box input {
+            width: 100%; padding: 12px; margin: 15px 0; border: 2px solid var(--gray);
+            border-radius: 8px; font-size: 1.2rem; font-family: 'Saira Condensed', sans-serif;
+            box-sizing: border-box;
+        }
+        .login-box input:focus { border-color: var(--primary-light); outline: none; }
+
         /* --- MENU --- */
+        .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
         .mode-list { display: flex; flex-direction: column; gap: 15px; }
         .mode-btn {
-            background: white; 
-            border: 2px solid var(--primary); 
-            padding: 15px;
-            border-radius: 8px; 
-            cursor: pointer; 
-            display: flex; 
-            justify-content: space-between;
-            align-items: center; 
-            transition: 0.2s; 
-            text-align: left;
-            font-family: 'Saira Condensed', sans-serif;
+            background: white; border: 2px solid var(--primary); padding: 15px;
+            border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between;
+            align-items: center; transition: 0.2s; text-align: left; font-family: 'Saira Condensed', sans-serif;
         }
-        .mode-btn:hover { 
-            background: var(--primary-light); 
-            color: white;
-            border-color: var(--primary-light);
-            transform: translateY(-2px); 
-        }
+        .mode-btn:hover { background: var(--primary-light); color: white; border-color: var(--primary-light); transform: translateY(-2px); }
         .mode-btn:hover strong, .mode-btn:hover small { color: white; }
         .mode-btn strong { display: block; font-size: 1.3rem; color: var(--primary); }
         .mode-btn small { color: #64748b; font-size: 1rem; }
-        .high-score { 
-            background: var(--warning); 
-            color: var(--dark);
-            padding: 5px 12px; 
-            border-radius: 20px; 
-            font-weight: 600; 
-            font-size: 1rem;
-        }
+        .high-score { background: var(--warning); color: var(--dark); padding: 5px 12px; border-radius: 20px; font-weight: 600;}
 
-        /* --- JEU --- */
-        .hidden { display: none !important; }
-        #game-header { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-bottom: 20px; 
-            font-weight: 600; 
-            font-size: 1.3rem;
-            color: var(--primary);
-        }
+        /* --- DESIGN DU JEU --- */
+        #game-header { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 600; font-size: 1.3rem; color: var(--primary);}
+        .lives-display { color: var(--danger); font-size: 1.3rem; letter-spacing: 2px;}
         
-        .photo-container {
-            width: 160px; height: 160px; margin: 0 auto 20px auto; border-radius: 50%;
-            overflow: hidden; border: 4px solid var(--primary); background-color: #ddd;
-        }
+        .photo-container { width: 160px; height: 160px; margin: 0 auto 20px auto; border-radius: 50%; overflow: hidden; border: 4px solid var(--primary); background-color: #ddd;}
         .photo-container img { width: 100%; height: 100%; object-fit: cover; }
-        
         .question-text { text-align: center; font-size: 1.4rem; margin-bottom: 20px; font-weight: 600; }
-
-        /* Grilles et Inputs */
+        
         .grid-qcm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;}
-        .grid-1-col { grid-template-columns: 1fr; }
-        .btn-option {
-            background: white; border: 2px solid var(--gray); padding: 12px; border-radius: 8px;
-            cursor: pointer; font-size: 1.1rem; transition: 0.2s; font-family: 'Saira Condensed', sans-serif;
-        }
+        .btn-option { background: white; border: 2px solid var(--gray); padding: 12px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-family: 'Saira Condensed', sans-serif; transition: 0.2s;}
         .btn-option:hover:not(:disabled) { border-color: var(--primary-light); background: #f0f7ff; }
         .btn-option.selected { background: var(--primary); color: white; border-color: var(--primary); }
         .btn-option.correct { background: var(--success) !important; color: white; border-color: var(--success); }
         .btn-option.wrong { background: var(--danger) !important; color: white; border-color: var(--danger); }
-        
+
         .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-weight: 600; font-size: 1rem; color: var(--primary); }
-        .input-group input { 
-            padding: 10px; border: 2px solid var(--gray); border-radius: 8px; 
-            font-size: 1.1rem; font-family: 'Saira Condensed', sans-serif;
-        }
+        .input-group label { font-weight: 600; color: var(--primary); }
+        .input-group input { padding: 10px; border: 2px solid var(--gray); border-radius: 8px; font-size: 1.1rem; font-family: 'Saira Condensed', sans-serif; box-sizing: border-box;}
         .input-group input:focus { border-color: var(--primary-light); outline: none; }
         .input-group input.correct { border-color: var(--success); background: #eafaf1; }
         .input-group input.wrong { border-color: var(--danger); background: #fdf2f2; }
-        
-        .checkbox-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; max-height: 250px; overflow-y: auto;}
-        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; font-size: 1.1rem;}
-        .checkbox-item:hover { background: #f8fafc; }
-
-        /* Multi-QCM (Mode 4) */
-        .multi-group { margin-bottom: 20px; border: 1px solid var(--gray); padding: 15px; border-radius: 8px;}
-        .multi-group h3 { margin-top: 0; font-size: 1.2rem; color: var(--primary); }
 
         .btn-action {
             background: var(--primary); color: white; border: none; padding: 12px; width: 100%;
             font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 10px;
-            font-family: 'Saira Condensed', sans-serif; letter-spacing: 1px;
+            font-family: 'Saira Condensed', sans-serif; letter-spacing: 1px; transition: 0.2s;
         }
         .btn-action:hover { opacity: 0.9; }
         .btn-quit { background: var(--dark); }
-
+        .btn-logout { background: transparent; color: var(--danger); border: 2px solid var(--danger); padding: 5px 10px; font-size: 1rem; cursor: pointer; border-radius: 5px; font-family: 'Saira Condensed', sans-serif; font-weight: 600; }
+        .btn-logout:hover { background: var(--danger); color: white; }
+        
         .feedback-area { margin-top: 15px; padding: 15px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2rem;}
         .feedback-area.success { background: #eafaf1; color: var(--success); }
         .feedback-area.error { background: #fdf2f2; color: var(--danger); }
-
-        /* Cartes Multi (Modes 5 & 6) */
+        
         .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .card-person {
-            border: 2px solid var(--gray); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; font-size: 1.1rem;
-        }
+        .card-person { border: 2px solid var(--gray); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s;}
+        .card-person:hover { background: #f0f7ff; }
         .card-person img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; }
         .card-person.selected { border-color: var(--primary); background: #f0f7ff; }
         .card-person.correct { border-color: var(--success); background: #eafaf1; }
         .card-person.wrong { border-color: var(--danger); background: #fdf2f2; }
-        .card-person.missed { border-color: var(--warning); } 
+        .card-person.missed { border-color: var(--warning); }
+        
+        .checkbox-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; max-height: 250px; overflow-y: auto;}
+        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s;}
+        .checkbox-item:hover { background: #f8fafc; }
+        
+        .multi-group { margin-bottom: 20px; border: 1px solid var(--gray); padding: 15px; border-radius: 8px;}
+        .multi-group h3 { margin-top: 0; font-size: 1.2rem; color: var(--primary); }
 
+        /* --- RESPONSIVE DESIGN --- */
+        @media (max-width: 480px) {
+            .grid-qcm, .grid-cards { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5rem; }
+            .container { padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -178,518 +132,45 @@
     <header>
         <h1>OUIDROP</h1>
         <p class="baseline">DROP & ENJOY</p>
-        <p class="subtitle">Le Trombinoscope de l'équipe</p>
     </header>
 
-    <div id="menu-screen" class="container">
-        <h2 style="color: var(--primary); text-align: center;">Choisissez un mode de jeu</h2>
-        <div class="mode-list" id="mode-list">
-            </div>
+    <div id="login-screen" class="container">
+        <div class="login-box">
+            <h2 style="color: var(--primary); margin: 0;">Espace Sécurisé</h2>
+            <p style="color: #64748b; margin: 5px 0 20px 0;">Entrez le mot de passe de l'entreprise pour décoder le trombinoscope.</p>
+            
+            <input type="password" id="secret-password" placeholder="Mot de passe OUIDROP..." onkeypress="if(event.key === 'Enter') handleLogin()">
+            <button class="btn-action" onclick="handleLogin()">Se connecter</button>
+            <p id="login-error" style="color: var(--danger); font-weight: bold; margin-top: 10px;" class="hidden">⚠️ Mot de passe incorrect ou fichier altéré.</p>
+        </div>
+    </div>
+
+    <div id="menu-screen" class="container hidden">
+        <div class="menu-header">
+            <h2 style="color: var(--primary); margin: 0;">Choisissez un mode</h2>
+            <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+        </div>
+        <div class="mode-list" id="mode-list"></div>
     </div>
 
     <div id="game-screen" class="container hidden">
         <div id="game-header">
             <span id="game-mode-title">Mode</span>
-            <span>Score : <span id="current-score">0</span> / <span id="max-possible">0</span></span>
+            <span id="lives-display" class="lives-display">❤️❤️❤️</span>
+            <span>Score: <span id="current-score">0</span></span>
         </div>
-
-        <div id="question-display">
-            </div>
-
+        <div id="question-display"></div>
         <div id="feedback-container" class="hidden feedback-area"></div>
-
         <button id="btn-validate" class="btn-action" onclick="validateAnswer()">Valider la réponse</button>
         <button id="btn-next" class="btn-action hidden" onclick="nextQuestion()">Suivant ➔</button>
         <button id="btn-quit" class="btn-action btn-quit" onclick="returnToMenu()">Quitter le jeu</button>
     </div>
 
     <script>
-        // --- 1. DONNÉES (JSON MOCK) ---
-        // Pensez à remplacer ceci par l'export JSON complet de votre annuaire.
-        const donneesAnnuaire = [
-  {
-    "item": {
-      "id": 4,
-      "name": "Vincent AMAUDRUZ",
-      "firstName": "Vincent",
-      "lastName": "AMAUDRUZ",
-      "birthDate": "1985-01-24T00:00:00",
-      "picture": "vincent_amaudruz.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 5,
-      "name": "Mehdi AZIEZ",
-      "firstName": "Mehdi",
-      "lastName": "AZIEZ",
-      "birthDate": "1980-07-05T00:00:00",
-      "picture": "mehdi_aziez.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 59,
-      "name": "Audrey BARBAZAN",
-      "firstName": "Audrey",
-      "lastName": "BARBAZAN",
-      "birthDate": "1995-06-14T00:00:00",
-      "picture": "audrey_barbazan.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 53,
-      "name": "Salaheddine BELHOUS",
-      "firstName": "Salaheddine",
-      "lastName": "BELHOUS",
-      "birthDate": "1995-11-03T00:00:00",
-      "picture": "salaheddine_belhous.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 41,
-      "name": "Clément BENILLAN",
-      "firstName": "Clément",
-      "lastName": "BENILLAN",
-      "birthDate": "1996-04-30T00:00:00",
-      "picture": "clement_benillan.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 6,
-      "name": "Léa BISCH",
-      "firstName": "Léa",
-      "lastName": "BISCH",
-      "birthDate": "1995-03-15T00:00:00",
-      "picture": "lea_bisch.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 7,
-      "name": "Jules BISSELER",
-      "firstName": "Jules",
-      "lastName": "BISSELER",
-      "birthDate": "1999-09-23T00:00:00",
-      "picture": "jules_bisseler.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 39,
-      "name": "Alexandre BLANC",
-      "firstName": "Alexandre",
-      "lastName": "BLANC",
-      "birthDate": "1977-04-19T00:00:00",
-      "picture": "alexandre_blanc.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 8,
-      "name": "Pierre BROCHARD",
-      "firstName": "Pierre",
-      "lastName": "BROCHARD",
-      "birthDate": "1985-05-05T00:00:00",
-      "picture": "pierre_brochard.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 56,
-      "name": "Liane CAMURAT",
-      "firstName": "Liane",
-      "lastName": "CAMURAT",
-      "birthDate": "1995-05-02T00:00:00",
-      "picture": "liane_camurat.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 9,
-      "name": "Marc CELESTIN",
-      "firstName": "Marc",
-      "lastName": "CELESTIN",
-      "birthDate": "1994-06-01T00:00:00",
-      "picture": "marc_celestin.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 10,
-      "name": "Jean CHANJOU-LECLERCQ",
-      "firstName": "Jean",
-      "lastName": "CHANJOU-LECLERCQ",
-      "birthDate": "1994-03-31T00:00:00",
-      "picture": "jean_chanjou-leclercq.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 11,
-      "name": "Florian COURTADE",
-      "firstName": "Florian",
-      "lastName": "COURTADE",
-      "birthDate": "1987-03-22T00:00:00",
-      "picture": "florian_courtade.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 12,
-      "name": "Guilhem DAGATTI",
-      "firstName": "Guilhem",
-      "lastName": "DAGATTI",
-      "birthDate": "2001-08-20T00:00:00",
-      "picture": "guilhem_dagatti.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 36,
-      "name": "Constance DE BASQUIAT DE MUGRIET",
-      "firstName": "Constance",
-      "lastName": "DE BASQUIAT DE MUGRIET",
-      "birthDate": "2005-03-19T00:00:00",
-      "picture": "constance_de_basquiat_de_mugriet.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 49,
-      "name": "Fathi DEBILI",
-      "firstName": "Fathi",
-      "lastName": "DEBILI",
-      "birthDate": "1977-08-01T00:00:00",
-      "picture": "fathi_debili.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 37,
-      "name": "Louis DUBLANCQ",
-      "firstName": "Louis",
-      "lastName": "DUBLANCQ",
-      "birthDate": "1991-01-30T00:00:00",
-      "picture": "louis_dublancq.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 34,
-      "name": "Clément DUTREY",
-      "firstName": "Clément",
-      "lastName": "DUTREY",
-      "birthDate": "1991-09-03T00:00:00",
-      "picture": "clement_dutrey.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 13,
-      "name": "Hugo ENDERLIN",
-      "firstName": "Hugo",
-      "lastName": "ENDERLIN",
-      "birthDate": "1995-05-09T00:00:00",
-      "picture": "hugo_enderlin.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 14,
-      "name": "Grégoire ETAIX",
-      "firstName": "Grégoire",
-      "lastName": "ETAIX",
-      "birthDate": "2002-02-24T00:00:00",
-      "picture": "gregoire_etaix.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 42,
-      "name": "Roman FONTENY",
-      "firstName": "Roman",
-      "lastName": "FONTENY",
-      "birthDate": "2003-03-18T00:00:00",
-      "picture": "roman_fonteny.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 48,
-      "name": "Hanane FRAIHA",
-      "firstName": "Hanane",
-      "lastName": "FRAIHA",
-      "birthDate": null,
-      "picture": "hanane_fraiha.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 15,
-      "name": "Edouard FREMONT",
-      "firstName": "Edouard",
-      "lastName": "FREMONT",
-      "birthDate": "1989-05-01T00:00:00",
-      "picture": "edouard_fremont.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 16,
-      "name": "Jérome GERARD RIVERA",
-      "firstName": "Jérome",
-      "lastName": "GERARD RIVERA",
-      "birthDate": "1978-08-21T00:00:00",
-      "picture": "jerome_gerard_rivera.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 40,
-      "name": "Renaud GODICHEAU",
-      "firstName": "Renaud",
-      "lastName": "GODICHEAU",
-      "birthDate": "1993-08-09T00:00:00",
-      "picture": "renaud_godicheau.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 18,
-      "name": "Marwane HILAL",
-      "firstName": "Marwane",
-      "lastName": "HILAL",
-      "birthDate": "1997-12-23T00:00:00",
-      "picture": "marwane_hilal.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 19,
-      "name": "Romain JINGEAUD",
-      "firstName": "Romain",
-      "lastName": "JINGEAUD",
-      "birthDate": "1996-11-13T00:00:00",
-      "picture": "romain_jingeaud.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 20,
-      "name": "Damien KIENTZEL",
-      "firstName": "Damien",
-      "lastName": "KIENTZEL",
-      "birthDate": "1993-05-08T00:00:00",
-      "picture": "damien_kientzel.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 21,
-      "name": "Rémy LAGUERRE",
-      "firstName": "Rémy",
-      "lastName": "LAGUERRE",
-      "birthDate": "1988-04-18T00:00:00",
-      "picture": "remy_laguerre.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 43,
-      "name": "Hugo LAINÉ",
-      "firstName": "Hugo",
-      "lastName": "LAINÉ",
-      "birthDate": "1999-11-10T00:00:00",
-      "picture": "hugo_laine.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 22,
-      "name": "Sébastien LAROCHE",
-      "firstName": "Sébastien",
-      "lastName": "LAROCHE",
-      "birthDate": "1998-12-07T00:00:00",
-      "picture": "sebastien_laroche.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 23,
-      "name": "Joel LAURET",
-      "firstName": "Joel",
-      "lastName": "LAURET",
-      "birthDate": "1988-04-20T00:00:00",
-      "picture": "joel_lauret.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 24,
-      "name": "Louis MARIN",
-      "firstName": "Louis",
-      "lastName": "MARIN",
-      "birthDate": "2003-09-22T00:00:00",
-      "picture": "louis_marin.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 3,
-      "name": "Anne-Lise MARTIN",
-      "firstName": "Anne-Lise",
-      "lastName": "MARTIN",
-      "birthDate": "1983-07-31T00:00:00",
-      "picture": "anne-lise_martin.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 25,
-      "name": "Marc MONGIS",
-      "firstName": "Marc",
-      "lastName": "MONGIS",
-      "birthDate": "1991-02-04T00:00:00",
-      "picture": "marc_mongis.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 50,
-      "name": "Mathis MOUAWAD",
-      "firstName": "Mathis",
-      "lastName": "MOUAWAD",
-      "birthDate": "2001-02-15T00:00:00",
-      "picture": "mathis_mouawad.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 2,
-      "name": "Corinne PEGORIE",
-      "firstName": "Corinne",
-      "lastName": "PEGORIE",
-      "birthDate": "1971-08-27T00:00:00",
-      "picture": "corinne_pegorie.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 27,
-      "name": "Thibaut PEYREBRUNE",
-      "firstName": "Thibaut",
-      "lastName": "PEYREBRUNE",
-      "birthDate": "2001-03-16T00:00:00",
-      "picture": "thibaut_peyrebrune.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 32,
-      "name": "Laurent POIROT",
-      "firstName": "Laurent",
-      "lastName": "POIROT",
-      "birthDate": "1965-10-14T00:00:00",
-      "picture": "laurent_poirot.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 1,
-      "name": "Paul PONSAR",
-      "firstName": "Paul",
-      "lastName": "PONSAR",
-      "birthDate": "1991-05-15T00:00:00",
-      "picture": "paul_ponsar.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 55,
-      "name": "Axelle REVEL",
-      "firstName": "Axelle",
-      "lastName": "REVEL",
-      "birthDate": null,
-      "picture": "axelle_revel.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 33,
-      "name": "Fanny SAINT-ORENS",
-      "firstName": "Fanny",
-      "lastName": "SAINT-ORENS",
-      "birthDate": "1996-06-26T00:00:00",
-      "picture": "fanny_saint-orens.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 35,
-      "name": "Joséphine SCHERTZ",
-      "firstName": "Joséphine",
-      "lastName": "SCHERTZ",
-      "birthDate": "1989-07-17T00:00:00",
-      "picture": "josephine_schertz.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 28,
-      "name": "Clément SERVENS",
-      "firstName": "Clément",
-      "lastName": "SERVENS",
-      "birthDate": "1982-07-19T00:00:00",
-      "picture": "clement_servens.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 52,
-      "name": "Thibault SOULIER",
-      "firstName": "Thibault",
-      "lastName": "SOULIER",
-      "birthDate": null,
-      "picture": "thibault_soulier.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 29,
-      "name": "Solène THORAVAL JOSSE",
-      "firstName": "Solène",
-      "lastName": "THORAVAL JOSSE",
-      "birthDate": "1997-09-02T00:00:00",
-      "picture": "solene_thoraval_josse.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 30,
-      "name": "Emmanuelle TRANCART",
-      "firstName": "Emmanuelle",
-      "lastName": "TRANCART",
-      "birthDate": "1990-01-23T00:00:00",
-      "picture": "emmanuelle_trancart.jpg"
-    }
-  },
-  {
-    "item": {
-      "id": 31,
-      "name": "Sofiane VIDAL",
-      "firstName": "Sofiane",
-      "lastName": "VIDAL",
-      "birthDate": "1981-10-22T00:00:00",
-      "picture": "sofiane_vidal.jpg"
-    }
-  }
-];
+        // --- VARIABLES GLOBALES ---
+        let donneesAnnuaire = [];
+        let encryptedDataText = ""; 
 
-        // --- 2. CONFIGURATION DES MODES DE JEU ---
         const MODES = [
             { id: 1, title: "1. Facile : Photo ➔ Nom (QCM)", desc: "Trouvez le bon nom parmi 4 choix." },
             { id: 2, title: "2. Modéré : Photo ➔ Nom (Texte)", desc: "Saisissez le prénom et le nom." },
@@ -700,47 +181,94 @@
             { id: 7, title: "7. Mixte 4 : Service ➔ Liste", desc: "Cochez les membres du service dans la liste." }
         ];
 
-        // --- 3. GESTION D'ÉTAT ---
         let highScores = JSON.parse(localStorage.getItem('trombiScoresOuidrop')) || {};
-        let currentMode = null;
-        let questions = [];
-        let currentIndex = 0;
-        let scoreSession = 0;
-        let maxPossibleSession = 0;
+        let currentMode = null; 
+        let questions = []; 
+        let currentIndex = 0; 
+        
+        let scoreSession = 0; 
+        let vies = 3; // 3 chances par partie
+        let currentExpectedPts = 0; // Calculé à chaque question selon le mode
 
-        // --- 4. UTILITAIRES ---
-        // Couleur de fond par défaut pour l'avatar : Bleu Nuit Ouidrop (20294E)
-        const getAvatar = (name, pic) => pic ? `./pictures/${pic}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=160&background=20294E&color=fff`;
-        const shuffle = (array) => array.sort(() => Math.random() - 0.5);
-        const normalizeStr = (str) => {
-            if(!str) return "";
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
-        };
-        const formatDate = (isoString) => {
-            if(!isoString) return "";
-            const d = new Date(isoString);
-            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}`;
-        };
-        const getUniqueVals = (key) => [...new Set(donneesAnnuaire.map(d => d.item[key]))];
+        // --- CHARGEMENT ET AUTO-LOGIN ---
+        async function fetchEncryptedFile() {
+            try {
+                const response = await fetch('trombi_encrypted.txt'); 
+                if (!response.ok) throw new Error("Fichier introuvable HTTP: " + response.status);
+                encryptedDataText = await response.text();
+                
+                // Tentative d'auto-login si le mot de passe est enregistré
+                const savedPwd = localStorage.getItem('ouidrop_pwd');
+                if (savedPwd) {
+                    document.getElementById('secret-password').value = savedPwd;
+                    handleLogin(true); // true = connexion automatique
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('login-screen').innerHTML = `
+                    <div style="text-align: center;">
+                        <h2 style="color:var(--danger);">⚠️ Impossible de charger les données.</h2>
+                        <p>Vérifiez que le fichier <strong>trombi_encrypted.txt</strong> est présent.</p>
+                    </div>`;
+            }
+        }
 
-        // --- 5. INITIALISATION ---
+        // --- GESTION DU LOGIN ---
+        function handleLogin(isAutoLogin = false) {
+            const password = document.getElementById('secret-password').value;
+            const errorLabel = document.getElementById('login-error');
+            
+            if (!encryptedDataText) {
+                if(!isAutoLogin) alert("Les données ne sont pas chargées.");
+                return;
+            }
+
+            try {
+                const bytes = CryptoJS.AES.decrypt(encryptedDataText.trim(), password);
+                const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+                
+                if(!decryptedText) throw new Error("Déchiffrement vide");
+
+                donneesAnnuaire = JSON.parse(decryptedText);
+                
+                // Si succès, on enregistre le mot de passe pour la prochaine fois
+                localStorage.setItem('ouidrop_pwd', password);
+                
+                document.getElementById('login-screen').classList.add('hidden');
+                initMenu();
+            } catch (error) {
+                // Si l'auto-login échoue (mot de passe changé/faux), on supprime la trace
+                localStorage.removeItem('ouidrop_pwd');
+                document.getElementById('secret-password').value = "";
+                if(!isAutoLogin) {
+                    console.error("Erreur de déchiffrement :", error); 
+                    errorLabel.classList.remove('hidden');
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('ouidrop_pwd');
+            donneesAnnuaire = [];
+            document.getElementById('secret-password').value = "";
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        // --- LOGIQUE DE JEU ---
         function initMenu() {
             document.getElementById('menu-screen').classList.remove('hidden');
             document.getElementById('game-screen').classList.add('hidden');
-            
             const list = document.getElementById('mode-list');
             list.innerHTML = "";
             MODES.forEach(m => {
                 const maxScore = highScores[m.id] || 0;
                 list.innerHTML += `
                     <div class="mode-btn" onclick="startGame(${m.id})">
-                        <div>
-                            <strong>${m.title}</strong>
-                            <small>${m.desc}</small>
-                        </div>
-                        <span class="high-score">Max: ${maxScore} pts</span>
-                    </div>
-                `;
+                        <div><strong>${m.title}</strong><small>${m.desc}</small></div>
+                        <span class="high-score">Record: ${maxScore} pts</span>
+                    </div>`;
             });
         }
 
@@ -750,7 +278,8 @@
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('game-mode-title').innerText = currentMode.title;
             
-            scoreSession = 0; maxPossibleSession = 0;
+            scoreSession = 0; 
+            vies = 3;
             questions = generateQuestionsForMode(modeId);
             currentIndex = 0;
             
@@ -759,16 +288,29 @@
         }
 
         function returnToMenu() {
-            if(scoreSession > (highScores[currentMode.id] || 0)) {
+            if (scoreSession > (highScores[currentMode.id] || 0)) {
                 highScores[currentMode.id] = scoreSession;
                 localStorage.setItem('trombiScoresOuidrop', JSON.stringify(highScores));
             }
             initMenu();
         }
 
-        // --- 6. MOTEUR DE JEU ---
+        // --- FONCTIONS UTILITAIRES ---
+        // Le paramètre "pic" doit contenir le nom de votre fichier d'image local (ex: arthur_fosc.jpg)
+        const getAvatar = (name, pic) => pic ? `./pictures/${pic}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=160&background=20294E&color=fff`;
+        const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+        const normalizeStr = (str) => !str ? "" : str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+        
+        const formatDate = (isoString) => { 
+            if(!isoString) return ""; 
+            const d = new Date(isoString); 
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}`; 
+        };
+        
+        const getUniqueVals = (key) => [...new Set(donneesAnnuaire.map(d => d.item[key]))];
+
         function generateQuestionsForMode(modeId) {
-            let q = [...donneesAnnuaire];
+            let q = [...donneesAnnuaire]; 
             shuffle(q);
             
             if (modeId === 5) {
@@ -781,65 +323,82 @@
             return q;
         }
 
+        // --- RENDU DES QUESTIONS ---
         function renderQuestion() {
-            if (currentIndex >= questions.length) {
-                document.getElementById('question-display').innerHTML = `<h3 style="text-align:center; color:var(--primary);">🎉 Session terminée ! Score : ${scoreSession} / ${maxPossibleSession}</h3>`;
-                document.getElementById('btn-validate').classList.add('hidden');
+            // Fin du jeu par épuisement des questions ou par épuisement des vies
+            if (currentIndex >= questions.length || vies <= 0) {
+                const isNewRecord = scoreSession > (highScores[currentMode.id] || 0);
+                const recordMsg = isNewRecord ? "<br>🏆 NOUVEAU RECORD !" : "";
+                
+                document.getElementById('question-display').innerHTML = `
+                    <h3 style="text-align:center; color:var(--primary);">
+                        ${vies <= 0 ? "💔 GAME OVER" : "🎉 C'EST UN SANS FAUTE !"}
+                        <br><br> Score final : ${scoreSession} point(s) ${recordMsg}
+                    </h3>`;
+                
+                document.getElementById('btn-validate').classList.add('hidden'); 
                 document.getElementById('btn-next').classList.add('hidden');
+                
+                // Sauvegarde immédiate du record à la fin
+                if (isNewRecord) {
+                    highScores[currentMode.id] = scoreSession;
+                    localStorage.setItem('trombiScoresOuidrop', JSON.stringify(highScores));
+                }
                 return;
             }
-
-            const target = questions[currentIndex];
+            
+            const target = questions[currentIndex]; 
             const display = document.getElementById('question-display');
-            document.getElementById('feedback-container').classList.add('hidden');
-            document.getElementById('btn-validate').classList.remove('hidden');
+            
+            document.getElementById('feedback-container').classList.add('hidden'); 
+            document.getElementById('btn-validate').classList.remove('hidden'); 
             document.getElementById('btn-next').classList.add('hidden');
             
-            let html = "";
-            let p = target.item; 
+            let html = ""; 
+            let p = target.item;
+            currentExpectedPts = 0; // Réinitialisation des points attendus
 
             switch (currentMode.id) {
-                case 1: 
-                    let optionsM1 = [p.name];
+                case 1:
+                    let optionsM1 = [p.name]; 
                     let autresM1 = shuffle(donneesAnnuaire.filter(d => d.item.id !== p.id).map(d => d.item.name)).slice(0,3);
                     optionsM1 = shuffle(optionsM1.concat(autresM1));
                     html = `
-                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="?"></div>
+                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="grid-qcm">
-                            ${optionsM1.map(opt => `<button class="btn-option select-one" onclick="selectOne(this, 'm1')">${opt}</button>`).join('')}
-                        </div>
-                    `;
-                    maxPossibleSession += 1;
+                            ${optionsM1.map(opt => `<button class="btn-option select-one" onclick="selectOne(this)">${opt}</button>`).join('')}
+                        </div>`;
+                    currentExpectedPts = 1; 
                     break;
-
-                case 2: 
+                    
+                case 2:
                     html = `
-                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="?"></div>
-                        <div class="input-group"><label>Prénom</label><input type="text" id="inp-prenom" placeholder="Saisir le prénom..."></div>
-                        <div class="input-group"><label>Nom de famille</label><input type="text" id="inp-nom" placeholder="Saisir le nom..."></div>
-                    `;
-                    maxPossibleSession += 2;
+                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
+                        <div class="input-group">
+                            <label>Prénom</label><input type="text" id="inp-prenom" placeholder="Saisir le prénom...">
+                            <label>Nom</label><input type="text" id="inp-nom" placeholder="Saisir le nom...">
+                        </div>`;
+                    currentExpectedPts = 2; 
                     break;
-
-                case 3: 
+                    
+                case 3:
                     html = `
-                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="?"></div>
+                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="grid-qcm">
                             <div class="input-group"><label>Prénom</label><input type="text" id="inp-prenom"></div>
                             <div class="input-group"><label>Nom</label><input type="text" id="inp-nom"></div>
                             <div class="input-group"><label>Fonction</label><input type="text" id="inp-fonction"></div>
                             <div class="input-group"><label>Service</label><input type="text" id="inp-service"></div>
                             <div class="input-group"><label>Naissance (JJ/MM)</label><input type="text" id="inp-date" placeholder="ex: 15/05"></div>
-                        </div>
-                    `;
-                    maxPossibleSession += 5;
+                        </div>`;
+                    currentExpectedPts = 5; 
                     break;
-
-                case 4: 
+                    
+                case 4:
                     let optF = shuffle([p.fonction].concat(shuffle(getUniqueVals('fonction').filter(f=>f!==p.fonction)).slice(0,3)));
                     let optS = shuffle([p.service].concat(shuffle(getUniqueVals('service').filter(s=>s!==p.service)).slice(0,3)));
                     html = `
-                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="?"></div>
+                        <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="question-text">${p.name}</div>
                         <div class="multi-group">
                             <h3>Sa Fonction ?</h3>
@@ -848,177 +407,205 @@
                         <div class="multi-group">
                             <h3>Son Service ?</h3>
                             <div class="grid-qcm">${optS.map(o => `<button class="btn-option sel-s" onclick="selectGroup(this, 'sel-s')">${o}</button>`).join('')}</div>
-                        </div>
-                    `;
-                    maxPossibleSession += 2;
+                        </div>`;
+                    currentExpectedPts = 2; 
                     break;
-
-                case 5: case 6: 
-                    const isM5 = (currentMode.id === 5);
+                    
+                case 5: 
+                case 6:
+                    const isM5 = (currentMode.id === 5); 
                     const title = isM5 ? target.val.split('|||').join(' - ') : target.val;
-                    let options = shuffle([...donneesAnnuaire]).slice(0, 6); 
-                    html = `<div class="question-text">Qui correspond à : <br><strong style="color:var(--primary-light)">${title}</strong> ?</div><div class="grid-cards">`;
-                    options.forEach(d => {
+                    let options = shuffle([...donneesAnnuaire]).slice(0, 6);
+                    html = `
+                        <div class="question-text">Qui correspond à : <br><strong style="color:var(--primary-light)">${title}</strong> ?</div>
+                        <div class="grid-cards">`;
+                    
+                    options.forEach(d => { 
                         html += `
                             <div class="card-person" data-id="${d.item.id}" onclick="this.classList.toggle('selected')">
-                                <img src="${getAvatar(d.item.name, d.item.picture)}"><br><strong>${d.item.name}</strong>
-                            </div>
-                        `;
+                                <img src="${getAvatar(d.item.name, d.item.picture)}" alt="Photo"><br>
+                                <strong>${d.item.name}</strong>
+                            </div>`; 
                     });
                     html += `</div>`;
+                    
                     let correctsInCards = options.filter(d => isM5 ? (d.item.fonction+"|||"+d.item.service === target.val) : (d.item.service === target.val)).length;
-                    maxPossibleSession += (correctsInCards === 0 ? 1 : correctsInCards); 
-                    display.dataset.corrects = correctsInCards;
+                    currentExpectedPts = (correctsInCards === 0 ? 1 : correctsInCards); 
+                    display.dataset.corrects = correctsInCards; 
                     break;
-
-                case 7: 
-                    const serv = target.val;
-                    let listPersons = shuffle([...donneesAnnuaire]); 
+                    
+                case 7:
+                    const serv = target.val; 
+                    let listPersons = shuffle([...donneesAnnuaire]);
                     html = `
                         <div class="question-text">Qui fait partie du service : <strong style="color:var(--primary-light)">${serv}</strong> ?</div>
-                        <div class="checkbox-list">
-                    `;
-                    listPersons.forEach(d => {
+                        <div class="checkbox-list">`;
+                    
+                    listPersons.forEach(d => { 
                         html += `
                             <label class="checkbox-item">
                                 <input type="checkbox" value="${d.item.id}"> ${d.item.name}
-                            </label>
-                        `;
+                            </label>`; 
                     });
                     html += `</div>`;
+                    
                     let totalCorrects = listPersons.filter(d => d.item.service === serv).length;
-                    maxPossibleSession += totalCorrects;
-                    display.dataset.corrects = totalCorrects;
+                    currentExpectedPts = (totalCorrects === 0 ? 1 : totalCorrects); 
+                    display.dataset.corrects = totalCorrects; 
                     break;
             }
-            display.innerHTML = html;
+            display.innerHTML = html; 
             updateScoreDisplay();
         }
 
-        // Fonctions UI
-        function selectOne(btn) {
-            document.querySelectorAll('.select-one').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
+        // --- VALIDATION ET SCORING ---
+        function selectOne(btn) { 
+            document.querySelectorAll('.select-one').forEach(b => b.classList.remove('selected')); 
+            btn.classList.add('selected'); 
         }
-        function selectGroup(btn, groupClass) {
-            document.querySelectorAll('.'+groupClass).forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
+        
+        function selectGroup(btn, groupClass) { 
+            document.querySelectorAll('.'+groupClass).forEach(b => b.classList.remove('selected')); 
+            btn.classList.add('selected'); 
         }
 
-        // Validation
         function validateAnswer() {
-            const target = questions[currentIndex];
-            let ptsGained = 0;
-            let feedback = "";
+            const target = questions[currentIndex]; 
+            let ptsGained = 0; 
+            let feedback = ""; 
             let p = target.item;
-
+            
             document.getElementById('btn-validate').classList.add('hidden');
             
             if (currentMode.id === 1) {
-                const sel = document.querySelector('.select-one.selected');
-                const btns = document.querySelectorAll('.select-one');
+                const sel = document.querySelector('.select-one.selected'); 
                 if(!sel) return alert("Sélectionnez une réponse !");
                 
-                btns.forEach(b => {
-                    b.disabled = true;
-                    if(b.innerText === p.name) b.classList.add('correct');
-                    else if(b === sel) b.classList.add('wrong');
+                document.querySelectorAll('.select-one').forEach(b => { 
+                    b.disabled = true; 
+                    if(b.innerText === p.name) b.classList.add('correct'); 
+                    else if(b === sel) b.classList.add('wrong'); 
                 });
                 
-                if (sel.innerText === p.name) { ptsGained = 1; feedback = "Correct !"; }
-                else { feedback = `Faux, c'était ${p.name}`; }
-
+                if (sel.innerText === p.name) { 
+                    ptsGained = 1; 
+                }
+                
             } else if (currentMode.id === 2 || currentMode.id === 3) {
                 const checkField = (id, trueVal) => {
-                    const el = document.getElementById(id);
+                    const el = document.getElementById(id); 
                     el.disabled = true;
-                    if (normalizeStr(el.value) === normalizeStr(trueVal)) { el.classList.add('correct'); return 1; }
-                    else {
+                    if (normalizeStr(el.value) === normalizeStr(trueVal)) { 
+                        el.classList.add('correct'); 
+                        return 1; 
+                    } else { 
                         el.classList.add('wrong'); 
-                        el.value = el.value ? `${el.value} (Attendu: ${trueVal})` : trueVal;
+                        el.value = el.value ? `${el.value} (Attendu: ${trueVal})` : trueVal; 
                         return 0; 
                     }
                 };
                 
-                ptsGained += checkField('inp-prenom', p.firstName);
+                ptsGained += checkField('inp-prenom', p.firstName); 
                 ptsGained += checkField('inp-nom', p.lastName);
                 
-                if (currentMode.id === 3) {
-                    ptsGained += checkField('inp-fonction', p.fonction);
-                    ptsGained += checkField('inp-service', p.service);
-                    ptsGained += checkField('inp-date', formatDate(p.birthDate));
+                if (currentMode.id === 3) { 
+                    ptsGained += checkField('inp-fonction', p.fonction); 
+                    ptsGained += checkField('inp-service', p.service); 
+                    ptsGained += checkField('inp-date', formatDate(p.birthDate)); 
                 }
-                feedback = `Vous avez obtenu ${ptsGained} point(s) sur cette question.`;
-
-            } else if (currentMode.id === 4) {
-                const fSel = document.querySelector('.sel-f.selected');
-                const sSel = document.querySelector('.sel-s.selected');
-                if(!fSel || !sSel) return alert("Sélectionnez une fonction ET un service !");
                 
+            } else if (currentMode.id === 4) {
+                const fSel = document.querySelector('.sel-f.selected'); 
+                const sSel = document.querySelector('.sel-s.selected');
+                
+                if(!fSel || !sSel) return alert("Sélectionnez une fonction et un service !");
                 document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
                 
                 if(fSel.innerText === p.fonction) { ptsGained++; fSel.classList.add('correct'); } else fSel.classList.add('wrong');
                 if(sSel.innerText === p.service) { ptsGained++; sSel.classList.add('correct'); } else sSel.classList.add('wrong');
                 
-                feedback = `Fonction : ${p.fonction} | Service : ${p.service}`;
-
             } else if (currentMode.id === 5 || currentMode.id === 6) {
-                const isM5 = (currentMode.id === 5);
-                const cards = document.querySelectorAll('.card-person');
+                const isM5 = (currentMode.id === 5); 
                 let expectedNum = parseInt(document.getElementById('question-display').dataset.corrects);
                 
-                cards.forEach(c => {
-                    const id = parseInt(c.dataset.id);
-                    const person = donneesAnnuaire.find(d => d.item.id === id).item;
+                document.querySelectorAll('.card-person').forEach(c => {
+                    const person = donneesAnnuaire.find(d => d.item.id === parseInt(c.dataset.id)).item;
                     const isExpected = isM5 ? (person.fonction+"|||"+person.service === target.val) : (person.service === target.val);
                     const isSelected = c.classList.contains('selected');
                     
                     if (isSelected && isExpected) { ptsGained++; c.classList.add('correct'); }
-                    else if (isSelected && !isExpected) { c.classList.add('wrong'); }
-                    else if (!isSelected && isExpected) { c.classList.add('missed'); }
+                    else if (isSelected && !isExpected) c.classList.add('wrong');
+                    else if (!isSelected && isExpected) c.classList.add('missed');
                 });
-                if(expectedNum === 0 && ptsGained === 0) ptsGained = 1; 
-                feedback = `Trouvé(s) : ${ptsGained} / ${expectedNum === 0 ? 1 : expectedNum}`;
-
-            } else if (currentMode.id === 7) {
-                const checks = document.querySelectorAll('input[type="checkbox"]');
-                checks.forEach(c => c.disabled = true);
                 
-                checks.forEach(c => {
-                    const id = parseInt(c.value);
-                    const person = donneesAnnuaire.find(d => d.item.id === id).item;
-                    const isExpected = (person.service === target.val);
+                if(expectedNum === 0 && ptsGained === 0) ptsGained = 1; // Validation du vide
+                
+            } else if (currentMode.id === 7) {
+                let emptyValidation = true;
+                let expectedNum = parseInt(document.getElementById('question-display').dataset.corrects);
+
+                document.querySelectorAll('input[type="checkbox"]').forEach(c => {
+                    c.disabled = true; 
+                    const person = donneesAnnuaire.find(d => d.item.id === parseInt(c.value)).item;
+                    const isExpected = (person.service === target.val); 
                     const isSelected = c.checked;
+                    
+                    if (isSelected || isExpected) emptyValidation = false;
                     
                     if (isSelected && isExpected) ptsGained++;
                     if(isExpected) c.parentElement.style.backgroundColor = "var(--success)";
                     if(isSelected && !isExpected) c.parentElement.style.backgroundColor = "var(--danger)";
                 });
-                feedback = `Points gagnés : ${ptsGained}`;
+                
+                if(expectedNum === 0 && emptyValidation) ptsGained = 1;
             }
 
-            scoreSession += ptsGained;
+            // Mettre à jour le score global
+            scoreSession += ptsGained; 
+
+            // Gestion de la pénalité (les vies)
+            const isPerfect = (ptsGained === currentExpectedPts);
+            if (!isPerfect) {
+                vies--;
+                feedback = `Aïe, il y a des erreurs ! Vous perdez une vie. 💔`;
+            } else {
+                feedback = `Parfait ! 🎉 (+${ptsGained} pts)`;
+            }
+
             updateScoreDisplay();
-
-            const fb = document.getElementById('feedback-container');
+            
+            const fb = document.getElementById('feedback-container'); 
             fb.innerText = feedback;
-            fb.className = "feedback-area " + (ptsGained > 0 ? "success" : "error");
+            fb.className = "feedback-area " + (isPerfect ? "success" : "error"); 
             fb.classList.remove('hidden');
-
+            
+            // Si le joueur n'a plus de vie, on change l'intitulé du bouton
+            if(vies <= 0) {
+                document.getElementById('btn-next').innerText = "Voir les résultats ➔";
+            } else {
+                document.getElementById('btn-next').innerText = "Suivant ➔";
+            }
+            
             document.getElementById('btn-next').classList.remove('hidden');
         }
 
-        function nextQuestion() {
-            currentIndex++;
-            renderQuestion();
+        function nextQuestion() { 
+            currentIndex++; 
+            renderQuestion(); 
+        }
+        
+        function updateScoreDisplay() { 
+            document.getElementById('current-score').innerText = scoreSession; 
+            
+            // Mise à jour de l'affichage des cœurs
+            let hearts = "";
+            for(let i = 0; i < vies; i++) hearts += "❤️";
+            for(let i = vies; i < 3; i++) hearts += "🖤"; // Cœur vide pour les vies perdues
+            document.getElementById('lives-display').innerText = hearts;
         }
 
-        function updateScoreDisplay() {
-            document.getElementById('current-score').innerText = scoreSession;
-            document.getElementById('max-possible').innerText = maxPossibleSession;
-        }
-
-        window.onload = initMenu;
+        // Lancement au démarrage de la page
+        window.onload = fetchEncryptedFile;
     </script>
 </body>
 </html>
