@@ -1,458 +1,971 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OUIDROP - Connexion & Jeu</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OUIDROP - Connexion & Jeu</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --primary: #20294E;       /* Bleu Nuit OUIDROP */
-            --primary-light: #82BEE9; /* Bleu Clair */
-            --success: #43B38A;       /* Vert */
-            --danger: #EC7C7C;        /* Rouge/Corail */
-            --warning: #DDDABF;       /* Beige */
-            --dark: #000000;          
-            --light: #f8fafc;
-            --gray: #cbd5e1;
-        }
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-        body {
-            font-family: 'Saira Condensed', system-ui, sans-serif;
-            background-color: var(--light);
-            color: var(--dark); 
-            margin: 0; padding: 20px; 
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-        }
+  <style>
+    :root {
+      --primary: #20294E;
+      /* Bleu Nuit OUIDROP */
+      --primary-light: #82BEE9;
+      /* Bleu Clair */
+      --success: #43B38A;
+      /* Vert */
+      --danger: #EC7C7C;
+      /* Rouge/Corail */
+      --warning: #DDDABF;
+      /* Beige */
+      --dark: #000000;
+      --light: #f8fafc;
+      --gray: #cbd5e1;
+    }
 
-        header { text-align: center; margin-bottom: 25px; }
-        h1 { margin: 0; font-size: 3rem; font-weight: 700; color: var(--primary); letter-spacing: 1px; text-transform: uppercase;}
-        .baseline { margin: 0; font-size: 1.2rem; color: var(--dark); letter-spacing: 2px;}
+    body {
+      font-family: 'Saira Condensed', system-ui, sans-serif;
+      background-color: var(--light);
+      color: var(--dark);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-        .container {
-            background: white; padding: 30px; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(32, 41, 78, 0.1); width: 100%; max-width: 600px;
-            box-sizing: border-box;
-            position: relative;
-        }
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
 
-        .hidden { display: none !important; }
+    h1 {
+      margin: 0;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
 
-        /* --- FORMULAIRE DE LOGIN --- */
-        .login-box { text-align: center; }
-        .login-box input {
-            width: 100%; padding: 12px; margin: 15px 0; border: 2px solid var(--gray);
-            border-radius: 8px; font-size: 1.2rem; font-family: 'Saira Condensed', sans-serif;
-            box-sizing: border-box;
-        }
-        .login-box input:focus { border-color: var(--primary-light); outline: none; }
+    .baseline {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--dark);
+      letter-spacing: 2px;
+    }
 
-        /* --- MENU --- */
-        .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
-        .mode-list { display: flex; flex-direction: column; gap: 15px; }
-        .mode-btn {
-            background: white; border: 2px solid var(--primary); padding: 15px;
-            border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between;
-            align-items: center; transition: 0.2s; text-align: left; font-family: 'Saira Condensed', sans-serif;
-        }
-        .mode-btn:hover { background: var(--primary-light); color: white; border-color: var(--primary-light); transform: translateY(-2px); }
-        .mode-btn:hover strong, .mode-btn:hover small { color: white; }
-        .mode-btn strong { display: block; font-size: 1.3rem; color: var(--primary); }
-        .mode-btn small { color: #64748b; font-size: 1rem; }
-        .high-score { background: var(--warning); color: var(--dark); padding: 5px 12px; border-radius: 20px; font-weight: 600;}
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(32, 41, 78, 0.1);
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+      position: relative;
+    }
 
-        /* --- DESIGN DU JEU --- */
-        #game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-weight: 600; font-size: 1.3rem; color: var(--primary);}
-        .lives-display { color: var(--danger); font-size: 1.3rem; letter-spacing: 2px;}
-        .score-display { display: flex; gap: 15px; background: var(--surface2); padding: 5px 12px; border-radius: 8px; border: 1px solid var(--border);}
-        
-        .photo-container { width: 160px; height: 160px; margin: 0 auto 20px auto; border-radius: 50%; overflow: hidden; border: 4px solid var(--primary); background-color: #ddd;}
-        .photo-container img { width: 100%; height: 100%; object-fit: cover; }
-        .question-text { text-align: center; font-size: 1.4rem; margin-bottom: 20px; font-weight: 600; }
-        
-        .grid-qcm { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;}
-        .btn-option { background: white; border: 2px solid var(--gray); padding: 12px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-family: 'Saira Condensed', sans-serif; transition: 0.2s;}
-        .btn-option:hover:not(:disabled) { border-color: var(--primary-light); background: #f0f7ff; }
-        .btn-option.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        .btn-option.correct { background: var(--success) !important; color: white; border-color: var(--success); }
-        .btn-option.wrong { background: var(--danger) !important; color: white; border-color: var(--danger); }
+    .hidden {
+      display: none !important;
+    }
 
-        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-        .input-group label { font-weight: 600; color: var(--primary); }
-        .input-group input { padding: 10px; border: 2px solid var(--gray); border-radius: 8px; font-size: 1.1rem; font-family: 'Saira Condensed', sans-serif; box-sizing: border-box;}
-        .input-group input:focus { border-color: var(--primary-light); outline: none; }
-        .input-group input.correct { border-color: var(--success); background: #eafaf1; }
-        .input-group input.wrong { border-color: var(--danger); background: #fdf2f2; }
+    /* --- FORMULAIRE DE LOGIN --- */
+    .login-box {
+      text-align: center;
+    }
 
-        .btn-action {
-            background: var(--primary); color: white; border: none; padding: 12px; width: 100%;
-            font-size: 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 10px;
-            font-family: 'Saira Condensed', sans-serif; letter-spacing: 1px; transition: 0.2s;
-        }
-        .btn-action:hover { opacity: 0.9; }
-        .btn-quit { background: var(--dark); }
-        .btn-logout { background: transparent; color: var(--danger); border: 2px solid var(--danger); padding: 5px 10px; font-size: 1rem; cursor: pointer; border-radius: 5px; font-family: 'Saira Condensed', sans-serif; font-weight: 600; }
-        .btn-logout:hover { background: var(--danger); color: white; }
-        
-        .feedback-area { margin-top: 15px; padding: 15px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2rem;}
-        .feedback-area.success { background: #eafaf1; color: var(--success); }
-        .feedback-area.error { background: #fdf2f2; color: var(--danger); }
-        
-        .grid-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .card-person { border: 2px solid var(--gray); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s;}
-        .card-person:hover { background: #f0f7ff; }
-        .card-person img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; }
-        .card-person.selected { border-color: var(--primary); background: #f0f7ff; }
-        .card-person.correct { border-color: var(--success); background: #eafaf1; }
-        .card-person.wrong { border-color: var(--danger); background: #fdf2f2; }
-        .card-person.missed { border-color: var(--warning); }
-        
-        .checkbox-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; max-height: 250px; overflow-y: auto;}
-        .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--gray); border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s;}
-        .checkbox-item:hover { background: #f8fafc; }
-        
-        .multi-group { margin-bottom: 20px; border: 1px solid var(--gray); padding: 15px; border-radius: 8px;}
-        .multi-group h3 { margin-top: 0; font-size: 1.2rem; color: var(--primary); }
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      font-size: 1.2rem;
+      font-family: 'Saira Condensed', sans-serif;
+      box-sizing: border-box;
+    }
 
-        /* --- RESPONSIVE DESIGN --- */
-        @media (max-width: 480px) {
-            .grid-qcm, .grid-cards { grid-template-columns: 1fr; }
-            h1 { font-size: 2.5rem; }
-            .container { padding: 20px; }
-            .score-display { font-size: 1rem; }
-        }
-    </style>
+    .login-box input:focus {
+      border-color: var(--primary-light);
+      outline: none;
+    }
+
+    /* --- MENU --- */
+    .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .mode-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .mode-btn {
+      background: white;
+      border: 2px solid var(--primary);
+      padding: 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.2s;
+      text-align: left;
+      font-family: 'Saira Condensed', sans-serif;
+    }
+
+    .mode-btn:hover {
+      background: var(--primary-light);
+      color: white;
+      border-color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    .mode-btn:hover strong,
+    .mode-btn:hover small {
+      color: white;
+    }
+
+    .mode-btn strong {
+      display: block;
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+
+    .mode-btn small {
+      color: #64748b;
+      font-size: 1rem;
+    }
+
+    .high-score {
+      background: var(--warning);
+      color: var(--dark);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* --- DESIGN DU JEU --- */
+    #game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+
+    .lives-display {
+      color: var(--danger);
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+    }
+
+    .score-display {
+      display: flex;
+      gap: 15px;
+      background: var(--light);
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--gray);
+    }
+
+    .photo-container {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 20px auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid var(--primary);
+      background-color: #ddd;
+    }
+
+    .photo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .question-text {
+      text-align: center;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .grid-qcm {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-option {
+      background: white;
+      border: 2px solid var(--gray);
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-family: 'Saira Condensed', sans-serif;
+      transition: 0.2s;
+    }
+
+    .btn-option:hover:not(:disabled) {
+      border-color: var(--primary-light);
+      background: #f0f7ff;
+    }
+
+    .btn-option.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-option.correct {
+      background: var(--success) !important;
+      color: white;
+      border-color: var(--success);
+    }
+
+    .btn-option.wrong {
+      background: var(--danger) !important;
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .input-group label {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .input-group input {
+      padding: 10px;
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-family: 'Saira Condensed', sans-serif;
+      box-sizing: border-box;
+    }
+
+    .input-group input:focus {
+      border-color: var(--primary-light);
+      outline: none;
+    }
+
+    .input-group input.correct {
+      border-color: var(--success);
+      background: #eafaf1;
+    }
+
+    .input-group input.wrong {
+      border-color: var(--danger);
+      background: #fdf2f2;
+    }
+
+    .btn-action {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-family: 'Saira Condensed', sans-serif;
+      letter-spacing: 1px;
+      transition: 0.2s;
+    }
+
+    .btn-action:hover {
+      opacity: 0.9;
+    }
+
+    .btn-quit {
+      background: var(--dark);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      padding: 6px 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+      font-family: 'Saira Condensed', sans-serif;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--primary-light);
+      color: white;
+      border-color: var(--primary-light);
+    }
+
+    .btn-logout {
+      background: transparent;
+      color: var(--danger);
+      border: 2px solid var(--danger);
+      padding: 5px 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+      font-family: 'Saira Condensed', sans-serif;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    .feedback-area {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .feedback-area.success {
+      background: #eafaf1;
+      color: var(--success);
+    }
+
+    .feedback-area.error {
+      background: #fdf2f2;
+      color: var(--danger);
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .card-person {
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .card-person:hover {
+      background: #f0f7ff;
+    }
+
+    .card-person img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 5px;
+    }
+
+    .card-person.selected {
+      border-color: var(--primary);
+      background: #f0f7ff;
+    }
+
+    .card-person.correct {
+      border-color: var(--success);
+      background: #eafaf1;
+    }
+
+    .card-person.wrong {
+      border-color: var(--danger);
+      background: #fdf2f2;
+    }
+
+    .card-person.missed {
+      border-color: var(--warning);
+    }
+
+    .checkbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: 0.2s;
+    }
+
+    .checkbox-item:hover {
+      background: #f8fafc;
+    }
+
+    .multi-group {
+      margin-bottom: 20px;
+      border: 1px solid var(--gray);
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .multi-group h3 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    /* --- ANNUAIRE / DIRECTORY --- */
+    .search-bar {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--gray);
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-family: 'Saira Condensed', sans-serif;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+    }
+
+    .search-bar:focus {
+      border-color: var(--primary-light);
+      outline: none;
+    }
+
+    .dir-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .dir-card {
+      background: var(--light);
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      padding: 20px 10px;
+      text-align: center;
+      transition: 0.2s;
+    }
+
+    .dir-card:hover {
+      border-color: var(--primary-light);
+      background: white;
+      box-shadow: 0 4px 15px rgba(32, 41, 78, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .dir-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 0 auto 12px;
+      border: 1px solid var(--primary);
+      background: #ddd;
+    }
+
+    .dir-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .dir-role {
+      font-size: 0.9rem;
+      color: #5A6385;
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .dir-info {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dir-info a {
+      color: var(--primary-light);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .dir-info a:hover {
+      text-decoration: underline;
+    }
+
+    /* --- RESPONSIVE DESIGN --- */
+    @media (max-width: 480px) {
+
+      .grid-qcm,
+      .grid-cards,
+      .dir-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .score-display {
+        font-size: 1rem;
+      }
+
+      header {
+        margin-bottom: 1rem;
+      }
+      header h1{
+        font-size: 1rem;
+      }
+      header .baseline{
+        display: none;
+      }
+
+      #game-header {
+        flex-direction: column;
+      }
+
+    }
+  </style>
 </head>
+
 <body>
 
-    <header>
-        <h1>OUIDROP</h1>
-        <p class="baseline">DROP & ENJOY</p>
-    </header>
+  <header>
+    <h1>OUIDROP</h1>
+    <p class="baseline">DROP & ENJOY</p>
+  </header>
 
-    <div id="login-screen" class="container">
-        <div class="login-box">
-            <h2 style="color: var(--primary); margin: 0;">Espace Sécurisé</h2>
-            <p style="color: #64748b; margin: 5px 0 20px 0;">Entrez le mot de passe de l'entreprise pour décoder le trombinoscope.</p>
-            
-            <input type="password" id="secret-password" placeholder="Mot de passe OUIDROP..." onkeypress="if(event.key === 'Enter') handleLogin()">
-            <button class="btn-action" onclick="handleLogin()">Se connecter</button>
-            <p id="login-error" style="color: var(--danger); font-weight: bold; margin-top: 10px;" class="hidden">⚠️ Mot de passe incorrect ou fichier altéré.</p>
-        </div>
+  <div id="login-screen" class="container">
+    <div class="login-box">
+      <h2 style="color: var(--primary); margin: 0;">Espace Sécurisé</h2>
+      <p style="color: #64748b; margin: 5px 0 20px 0;">Entrez le mot de passe de l'entreprise pour décoder le
+        trombinoscope.</p>
+
+      <input type="password" id="secret-password" placeholder="Mot de passe OUIDROP..."
+        onkeypress="if(event.key === 'Enter') handleLogin()">
+      <button class="btn-action" onclick="handleLogin()">Se connecter</button>
+      <p id="login-error" style="color: var(--danger); font-weight: bold; margin-top: 10px;" class="hidden">⚠️ Mot de
+        passe incorrect ou fichier altéré.</p>
     </div>
+  </div>
 
-    <div id="menu-screen" class="container hidden">
-        <div class="menu-header">
-            <h2 style="color: var(--primary); margin: 0;">Choisissez un mode</h2>
-            <button class="btn-logout" onclick="logout()">Se déconnecter</button>
-        </div>
-        <div class="mode-list" id="mode-list"></div>
+  <div id="menu-screen" class="container hidden">
+    <div class="menu-header">
+      <h2 style="color: var(--primary); margin: 0;">Accueil</h2>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+        <button class="btn-secondary" onclick="showDirectory()">📚 Voir l'annuaire</button>
+        <button class="btn-logout" onclick="logout()">Se déconnecter</button>
+      </div>
     </div>
+    <div class="mode-list" id="mode-list"></div>
+  </div>
 
-    <div id="game-screen" class="container hidden">
-        <div id="game-header">
-            <span id="game-mode-title">Mode</span>
-            <span id="lives-display" class="lives-display">❤️❤️❤️</span>
-            <div class="score-display">
-                <span style="color: var(--primary-light);">⏱️ <b id="timer-live">00:00</b></span>
-                <span>Score: <b id="current-score">0</b></span>
-            </div>
-        </div>
-        <div id="question-display"></div>
-        <div id="feedback-container" class="hidden feedback-area"></div>
-        <button id="btn-validate" class="btn-action" onclick="validateAnswer()">Valider la réponse</button>
-        <button id="btn-next" class="btn-action hidden" onclick="nextQuestion()">Suivant ➔</button>
-        <button id="btn-quit" class="btn-action btn-quit" onclick="returnToMenu()">Quitter le jeu</button>
+  <div id="directory-screen" class="container hidden" style="max-width: 850px;">
+    <div class="menu-header">
+      <h2 style="color: var(--primary); margin: 0;">Annuaire Complet</h2>
+      <button class="btn-secondary" onclick="hideDirectory()">Retour au menu</button>
     </div>
+    <input type="text" id="dir-search" class="search-bar" placeholder="🔍 Rechercher par nom, fonction, service..."
+      oninput="filterDirectory()">
+    <div id="directory-grid" class="dir-grid">
+    </div>
+  </div>
 
-    <script>
-        // --- VARIABLES GLOBALES ---
-        let donneesAnnuaire = [];
-        let encryptedDataText = ""; 
+  <div id="game-screen" class="container hidden">
+    <div id="game-header">
+      <span id="game-mode-title">Mode</span>
+      <span id="lives-display" class="lives-display">❤️❤️❤️</span>
+      <div class="score-display">
+        <span style="color: var(--primary-light);">⏱️ <b id="timer-live">00:00</b></span>
+        <span>Score: <b id="current-score">0</b></span>
+      </div>
+    </div>
+    <div id="question-display"></div>
+    <div id="feedback-container" class="hidden feedback-area"></div>
+    <button id="btn-validate" class="btn-action" onclick="validateAnswer()">Valider la réponse</button>
+    <button id="btn-next" class="btn-action hidden" onclick="nextQuestion()">Suivant ➔</button>
+    <button id="btn-quit" class="btn-action btn-quit" onclick="returnToMenu()">Quitter le jeu</button>
+  </div>
 
-        const MODES = [
-            { id: 1, title: "1. Facile : Photo ➔ Nom (QCM)", desc: "Trouvez le bon nom parmi 4 choix." },
-            { id: 2, title: "2. Modéré : Photo ➔ Nom (Texte)", desc: "Saisissez le prénom et le nom." },
-            { id: 3, title: "3. Difficile : Photo ➔ Tout (Texte)", desc: "Saisissez infos et naissance (JJ/MM)." },
-            { id: 4, title: "4. Mixte 1 : Photo + Nom ➔ Fonction & Service", desc: "Associez la bonne fonction et service." },
-            { id: 5, title: "5. Mixte 2 : Fonction & Service ➔ Personnes", desc: "Trouvez toutes les personnes correspondantes." },
-            { id: 6, title: "6. Mixte 3 : Service ➔ Personnes (Photo)", desc: "Retrouvez les visages d'un service." },
-            { id: 7, title: "7. Mixte 4 : Service ➔ Liste", desc: "Cochez les membres du service dans la liste." }
-        ];
+  <script>
+    // --- VARIABLES GLOBALES ---
+    let donneesAnnuaire = [];
+    let encryptedDataText = "";
 
-        // Format du localStorage pour supporter le timer : { "1": { score: 10, time: 45 }, "2": ... }
-        let highScores = JSON.parse(localStorage.getItem('trombiScoresOuidrop')) || {};
-        let currentMode = null; 
-        let questions = []; 
-        let currentIndex = 0; 
-        
-        let scoreSession = 0; 
-        let vies = 3; 
-        let currentExpectedPts = 0; 
+    const MODES = [
+      { id: 1, title: "1. Facile : Photo ➔ Nom (QCM)", desc: "Trouvez le bon nom parmi 4 choix." },
+      { id: 2, title: "2. Modéré : Photo ➔ Nom (Texte)", desc: "Saisissez le prénom et le nom." },
+      { id: 3, title: "3. Difficile : Photo ➔ Tout (Texte)", desc: "Saisissez infos et naissance (JJ/MM)." },
+      { id: 4, title: "4. Mixte 1 : Photo + Nom ➔ Fonction & Service", desc: "Associez la bonne fonction et service." },
+      { id: 5, title: "5. Mixte 2 : Fonction & Service ➔ Personnes", desc: "Trouvez toutes les personnes correspondantes." },
+      { id: 6, title: "6. Mixte 3 : Service ➔ Personnes (Photo)", desc: "Retrouvez les visages d'un service." },
+      { id: 7, title: "7. Mixte 4 : Service ➔ Liste", desc: "Cochez les membres du service dans la liste." }
+    ];
 
-        // Variables du Timer
-        let timeSeconds = 0;
-        let timerInterval = null;
+    let highScores = JSON.parse(localStorage.getItem('trombiScoresOuidrop')) || {};
+    let currentMode = null;
+    let questions = [];
+    let currentIndex = 0;
 
-        // --- CHARGEMENT ET AUTO-LOGIN ---
-        async function fetchEncryptedFile() {
-            try {
-                const response = await fetch('trombi_encrypted.txt'); 
-                if (!response.ok) throw new Error("Fichier introuvable HTTP: " + response.status);
-                encryptedDataText = await response.text();
-                
-                const savedPwd = localStorage.getItem('ouidrop_pwd');
-                if (savedPwd) {
-                    document.getElementById('secret-password').value = savedPwd;
-                    handleLogin(true);
-                }
-            } catch (e) {
-                console.error(e);
-                document.getElementById('login-screen').innerHTML = `
+    let scoreSession = 0;
+    let vies = 3;
+    let currentExpectedPts = 0;
+
+    // Variables du Timer
+    let timeSeconds = 0;
+    let timerInterval = null;
+
+    // --- CHARGEMENT ET AUTO-LOGIN ---
+    async function fetchEncryptedFile() {
+      try {
+        const response = await fetch('trombi_encrypted.txt');
+        if (!response.ok) throw new Error("Fichier introuvable HTTP: " + response.status);
+        encryptedDataText = await response.text();
+
+        const savedPwd = localStorage.getItem('ouidrop_pwd');
+        if (savedPwd) {
+          document.getElementById('secret-password').value = savedPwd;
+          handleLogin(true);
+        }
+      } catch (e) {
+        console.error(e);
+        document.getElementById('login-screen').innerHTML = `
                     <div style="text-align: center;">
                         <h2 style="color:var(--danger);">⚠️ Impossible de charger les données.</h2>
                         <p>Vérifiez que le fichier <strong>trombi_encrypted.txt</strong> est présent.</p>
                     </div>`;
-            }
+      }
+    }
+
+    function handleLogin(isAutoLogin = false) {
+      const password = document.getElementById('secret-password').value;
+      const errorLabel = document.getElementById('login-error');
+
+      if (!encryptedDataText) {
+        if (!isAutoLogin) alert("Les données ne sont pas chargées.");
+        return;
+      }
+
+      try {
+        const bytes = CryptoJS.AES.decrypt(encryptedDataText.trim(), password);
+        const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+
+        if (!decryptedText) throw new Error("Déchiffrement vide");
+
+        donneesAnnuaire = JSON.parse(decryptedText);
+
+        localStorage.setItem('ouidrop_pwd', password);
+        document.getElementById('login-screen').classList.add('hidden');
+        initMenu();
+      } catch (error) {
+        localStorage.removeItem('ouidrop_pwd');
+        document.getElementById('secret-password').value = "";
+        if (!isAutoLogin) {
+          console.error("Erreur de déchiffrement :", error);
+          errorLabel.classList.remove('hidden');
+        }
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('ouidrop_pwd');
+      donneesAnnuaire = [];
+      document.getElementById('secret-password').value = "";
+      document.getElementById('menu-screen').classList.add('hidden');
+      document.getElementById('directory-screen').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('login-error').classList.add('hidden');
+    }
+
+    // --- GESTION DE L'ANNUAIRE (DIRECTORY) ---
+    function showDirectory() {
+      document.getElementById('menu-screen').classList.add('hidden');
+      document.getElementById('directory-screen').classList.remove('hidden');
+      document.getElementById('dir-search').value = "";
+      renderDirectory("");
+    }
+
+    function hideDirectory() {
+      document.getElementById('directory-screen').classList.add('hidden');
+      document.getElementById('menu-screen').classList.remove('hidden');
+    }
+
+    function filterDirectory() {
+      const query = document.getElementById('dir-search').value.toLowerCase();
+      renderDirectory(query);
+    }
+
+    function renderDirectory(query) {
+      const grid = document.getElementById('directory-grid');
+      grid.innerHTML = '';
+
+      // On filtre selon la recherche
+      const filtered = donneesAnnuaire.filter(d => {
+        const p = d.item;
+        const searchStr = `${p.firstName} ${p.lastName} ${p.fonction} ${p.service}`.toLowerCase();
+        return searchStr.includes(query);
+      });
+
+      // On trie par ordre alphabétique (Nom de famille)
+      filtered.sort((a, b) => a.item.lastName.localeCompare(b.item.lastName)).forEach(d => {
+        const p = d.item;
+        const card = document.createElement('div');
+        card.className = 'dir-card';
+
+        const mail = p.mail ? `<div class="dir-info">📧 <a href="mailto:${p.mail}">${p.mail}</a></div>` : '';
+        const phone = p.professionalMobile ? `<div class="dir-info">📱 ${p.professionalMobile}</div>` : '';
+        const birth = p.birthDate ? `<div class="dir-info">🎂 ${formatDate(p.birthDate)}</div>` : '';
+
+        card.innerHTML = `
+                    <img class="dir-avatar" src="${getAvatar(p.name, p.picture)}" alt="${p.name}">
+                    <div class="dir-name">${p.firstName} ${p.lastName}</div>
+                    <div class="dir-role">${p.fonction || ''}<br><span style="font-weight:400; font-size:0.8rem;">${p.service || ''}</span></div>
+                    ${mail}
+                    ${phone}
+                    ${birth}
+                `;
+        grid.appendChild(card);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color: var(--text2);">Aucun collègue trouvé pour "${query}".</p>`;
+      }
+    }
+
+
+    // --- TIMER FUNCTIONS ---
+    function startTimer() {
+      timeSeconds = 0;
+      updateTimerDisplay();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function formatTime(totalSeconds) {
+      if (totalSeconds === Infinity || totalSeconds === undefined) return "--:--";
+      const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const s = String(totalSeconds % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function updateTimerDisplay() {
+      const el = document.getElementById('timer-live');
+      if (el) el.textContent = formatTime(timeSeconds);
+    }
+
+    // --- LOGIQUE DE JEU ---
+    function initMenu() {
+      document.getElementById('menu-screen').classList.remove('hidden');
+      document.getElementById('game-screen').classList.add('hidden');
+      const list = document.getElementById('mode-list');
+      list.innerHTML = "";
+
+      MODES.forEach(m => {
+        let maxScore = 0;
+        let timeStr = "";
+
+        let rec = highScores[m.id];
+        if (rec) {
+          if (typeof rec === 'number') {
+            maxScore = rec;
+          } else {
+            maxScore = rec.score;
+            if (rec.time) timeStr = ` <span style="font-weight:400; opacity:0.8;">(${formatTime(rec.time)})</span>`;
+          }
         }
 
-        function handleLogin(isAutoLogin = false) {
-            const password = document.getElementById('secret-password').value;
-            const errorLabel = document.getElementById('login-error');
-            
-            if (!encryptedDataText) {
-                if(!isAutoLogin) alert("Les données ne sont pas chargées.");
-                return;
-            }
-
-            try {
-                const bytes = CryptoJS.AES.decrypt(encryptedDataText.trim(), password);
-                const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
-                
-                if(!decryptedText) throw new Error("Déchiffrement vide");
-
-                donneesAnnuaire = JSON.parse(decryptedText);
-                
-                localStorage.setItem('ouidrop_pwd', password);
-                document.getElementById('login-screen').classList.add('hidden');
-                initMenu();
-            } catch (error) {
-                localStorage.removeItem('ouidrop_pwd');
-                document.getElementById('secret-password').value = "";
-                if(!isAutoLogin) {
-                    console.error("Erreur de déchiffrement :", error); 
-                    errorLabel.classList.remove('hidden');
-                }
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('ouidrop_pwd');
-            donneesAnnuaire = [];
-            document.getElementById('secret-password').value = "";
-            document.getElementById('menu-screen').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('login-error').classList.add('hidden');
-        }
-
-        // --- TIMER FUNCTIONS ---
-        function startTimer() {
-            timeSeconds = 0;
-            updateTimerDisplay();
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeSeconds++;
-                updateTimerDisplay();
-            }, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-        }
-
-        function formatTime(totalSeconds) {
-            if (totalSeconds === Infinity || totalSeconds === undefined) return "--:--";
-            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const s = String(totalSeconds % 60).padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
-        function updateTimerDisplay() {
-            const el = document.getElementById('timer-live');
-            if (el) el.textContent = formatTime(timeSeconds);
-        }
-
-        // --- LOGIQUE DE JEU ---
-        function initMenu() {
-            document.getElementById('menu-screen').classList.remove('hidden');
-            document.getElementById('game-screen').classList.add('hidden');
-            const list = document.getElementById('mode-list');
-            list.innerHTML = "";
-            
-            MODES.forEach(m => {
-                let maxScore = 0;
-                let timeStr = "";
-                
-                // Rétrocompatibilité (Si l'ancien score était juste un nombre)
-                let rec = highScores[m.id];
-                if (rec) {
-                    if (typeof rec === 'number') {
-                        maxScore = rec;
-                    } else {
-                        maxScore = rec.score;
-                        if(rec.time) timeStr = ` <span style="font-weight:400; opacity:0.8;">(${formatTime(rec.time)})</span>`;
-                    }
-                }
-
-                list.innerHTML += `
+        list.innerHTML += `
                     <div class="mode-btn" onclick="startGame(${m.id})">
                         <div><strong>${m.title}</strong><small>${m.desc}</small></div>
                         <span class="high-score">Record: ${maxScore} pts${timeStr}</span>
                     </div>`;
-            });
+      });
+    }
+
+    function startGame(modeId) {
+      currentMode = MODES.find(m => m.id === modeId);
+      document.getElementById('menu-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.remove('hidden');
+      document.getElementById('game-mode-title').innerText = currentMode.title;
+
+      scoreSession = 0;
+      vies = 3;
+      questions = generateQuestionsForMode(modeId);
+      currentIndex = 0;
+
+      updateScoreDisplay();
+      startTimer();
+      renderQuestion();
+    }
+
+    function returnToMenu() {
+      stopTimer();
+      initMenu();
+    }
+
+    // --- FONCTIONS UTILITAIRES ---
+    const getAvatar = (name, pic) => pic ? `./pictures/${pic}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=160&background=20294E&color=fff`;
+    const normalizeStr = (str) => !str ? "" : str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+    const formatDate = (isoString) => {
+      if (!isoString) return "";
+      const d = new Date(isoString);
+      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    };
+    const getUniqueVals = (key) => [...new Set(donneesAnnuaire.map(d => d.item[key]))];
+
+    function shuffle(array) {
+      let arr = [...array];
+      let currentIndex = arr.length, randomIndex;
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
+      }
+      return arr;
+    }
+
+    function generateQuestionsForMode(modeId) {
+      let q = [...donneesAnnuaire];
+      q = shuffle(q);
+
+      if (modeId === 5) {
+        const pairs = [...new Set(donneesAnnuaire.map(d => d.item.fonction + "|||" + d.item.service))];
+        return shuffle(pairs.map(p => ({ type: 'pair', val: p })));
+      }
+      if (modeId === 6 || modeId === 7) {
+        return shuffle(getUniqueVals('service').map(s => ({ type: 'service', val: s })));
+      }
+      return q;
+    }
+
+    // --- RENDU DES QUESTIONS ---
+    function renderQuestion() {
+      if (currentIndex >= questions.length || vies <= 0) {
+        stopTimer();
+
+        let currentBest = highScores[currentMode.id];
+        let bestScore = 0;
+        let bestTime = Infinity;
+
+        if (currentBest) {
+          if (typeof currentBest === 'number') {
+            bestScore = currentBest;
+          } else {
+            bestScore = currentBest.score;
+            bestTime = currentBest.time || Infinity;
+          }
         }
 
-        function startGame(modeId) {
-            currentMode = MODES.find(m => m.id === modeId);
-            document.getElementById('menu-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-            document.getElementById('game-mode-title').innerText = currentMode.title;
-            
-            scoreSession = 0; 
-            vies = 3;
-            questions = generateQuestionsForMode(modeId);
-            currentIndex = 0;
-            
-            updateScoreDisplay();
-            startTimer(); // Démarrage du chrono !
-            renderQuestion();
+        let isNewRecord = false;
+        if (scoreSession > bestScore || (scoreSession === bestScore && timeSeconds < bestTime && scoreSession > 0)) {
+          isNewRecord = true;
+          highScores[currentMode.id] = { score: scoreSession, time: timeSeconds };
+          localStorage.setItem('trombiScoresOuidrop', JSON.stringify(highScores));
         }
 
-        function returnToMenu() {
-            stopTimer();
-            initMenu();
-        }
+        const recordMsg = isNewRecord ? "<br>🏆 NOUVEAU RECORD !" : "";
+        const timeString = formatTime(timeSeconds);
 
-        // --- FONCTIONS UTILITAIRES ---
-        const getAvatar = (name, pic) => pic ? `./pictures/${pic}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=160&background=20294E&color=fff`;
-        const normalizeStr = (str) => !str ? "" : str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
-        const formatDate = (isoString) => { 
-            if(!isoString) return ""; 
-            const d = new Date(isoString); 
-            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}`; 
-        };
-        const getUniqueVals = (key) => [...new Set(donneesAnnuaire.map(d => d.item[key]))];
-
-        // Nouvel algorithme de mélange Strict (Fisher-Yates) impartial
-        function shuffle(array) {
-            let arr = [...array];
-            let currentIndex = arr.length, randomIndex;
-            while (currentIndex !== 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [arr[currentIndex], arr[randomIndex]] = [arr[randomIndex], arr[currentIndex]];
-            }
-            return arr;
-        }
-
-        function generateQuestionsForMode(modeId) {
-            let q = [...donneesAnnuaire]; 
-            q = shuffle(q);
-            
-            if (modeId === 5) {
-                const pairs = [...new Set(donneesAnnuaire.map(d => d.item.fonction + "|||" + d.item.service))];
-                return shuffle(pairs.map(p => ({ type: 'pair', val: p })));
-            }
-            if (modeId === 6 || modeId === 7) {
-                return shuffle(getUniqueVals('service').map(s => ({ type: 'service', val: s })));
-            }
-            return q;
-        }
-
-        // --- RENDU DES QUESTIONS ---
-        function renderQuestion() {
-            if (currentIndex >= questions.length || vies <= 0) {
-                stopTimer(); // On arrête le chrono
-                
-                // --- Logique de sauvegarde du record avec prise en compte du temps ---
-                let currentBest = highScores[currentMode.id];
-                let bestScore = 0;
-                let bestTime = Infinity;
-
-                if (currentBest) {
-                    if (typeof currentBest === 'number') {
-                        bestScore = currentBest;
-                    } else {
-                        bestScore = currentBest.score;
-                        bestTime = currentBest.time || Infinity;
-                    }
-                }
-
-                let isNewRecord = false;
-                // C'est un record si le score est plus grand, OU si le score est égal mais que le temps est inférieur
-                if (scoreSession > bestScore || (scoreSession === bestScore && timeSeconds < bestTime && scoreSession > 0)) {
-                    isNewRecord = true;
-                    highScores[currentMode.id] = { score: scoreSession, time: timeSeconds };
-                    localStorage.setItem('trombiScoresOuidrop', JSON.stringify(highScores));
-                }
-                
-                const recordMsg = isNewRecord ? "<br>🏆 NOUVEAU RECORD !" : "";
-                const timeString = formatTime(timeSeconds);
-                
-                document.getElementById('question-display').innerHTML = `
+        document.getElementById('question-display').innerHTML = `
                     <h3 style="text-align:center; color:var(--primary);">
                         ${vies <= 0 ? "💔 GAME OVER" : "🎉 C'EST UN SANS FAUTE !"}
                         <br><br> Score final : ${scoreSession} point(s) en ${timeString} ${recordMsg}
                     </h3>`;
-                
-                document.getElementById('btn-validate').classList.add('hidden'); 
-                document.getElementById('btn-next').classList.add('hidden');
-                return;
-            }
-            
-            const target = questions[currentIndex]; 
-            const display = document.getElementById('question-display');
-            
-            document.getElementById('feedback-container').classList.add('hidden'); 
-            document.getElementById('btn-validate').classList.remove('hidden'); 
-            document.getElementById('btn-next').classList.add('hidden');
-            
-            let html = ""; 
-            let p = target.item;
-            currentExpectedPts = 0; 
 
-            switch (currentMode.id) {
-                case 1:
-                    let autresM1 = shuffle(donneesAnnuaire.filter(d => d.item.id !== p.id).map(d => d.item.name)).slice(0,3);
-                    // On fusionne proprement dans un seul tableau avant de le mélanger avec Fisher-Yates
-                    let optionsM1 = shuffle([p.name, ...autresM1]);
-                    
-                    html = `
+        document.getElementById('btn-validate').classList.add('hidden');
+        document.getElementById('btn-next').classList.add('hidden');
+        return;
+      }
+
+      const target = questions[currentIndex];
+      const display = document.getElementById('question-display');
+
+      document.getElementById('feedback-container').classList.add('hidden');
+      document.getElementById('btn-validate').classList.remove('hidden');
+      document.getElementById('btn-next').classList.add('hidden');
+
+      let html = "";
+      let p = target.item;
+      currentExpectedPts = 0;
+
+      switch (currentMode.id) {
+        case 1:
+          let autresM1 = shuffle(donneesAnnuaire.filter(d => d.item.id !== p.id).map(d => d.item.name)).slice(0, 3);
+          let optionsM1 = shuffle([p.name, ...autresM1]);
+
+          html = `
                         <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="grid-qcm">
                             ${optionsM1.map(opt => `<button class="btn-option select-one" onclick="selectOne(this)">${opt}</button>`).join('')}
                         </div>`;
-                    currentExpectedPts = 1; 
-                    break;
-                    
-                case 2:
-                    html = `
+          currentExpectedPts = 1;
+          break;
+
+        case 2:
+          html = `
                         <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="input-group">
                             <label>Prénom</label><input type="text" id="inp-prenom" placeholder="Saisir le prénom...">
                             <label>Nom</label><input type="text" id="inp-nom" placeholder="Saisir le nom...">
                         </div>`;
-                    currentExpectedPts = 2; 
-                    break;
-                    
-                case 3:
-                    html = `
+          currentExpectedPts = 2;
+          break;
+
+        case 3:
+          html = `
                         <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="grid-qcm">
                             <div class="input-group"><label>Prénom</label><input type="text" id="inp-prenom"></div>
@@ -461,14 +974,14 @@
                             <div class="input-group"><label>Service</label><input type="text" id="inp-service"></div>
                             <div class="input-group"><label>Naissance (JJ/MM)</label><input type="text" id="inp-date" placeholder="ex: 15/05"></div>
                         </div>`;
-                    currentExpectedPts = 5; 
-                    break;
-                    
-                case 4:
-                    let optF = shuffle([p.fonction, ...shuffle(getUniqueVals('fonction').filter(f=>f!==p.fonction)).slice(0,3)]);
-                    let optS = shuffle([p.service, ...shuffle(getUniqueVals('service').filter(s=>s!==p.service)).slice(0,3)]);
-                    
-                    html = `
+          currentExpectedPts = 5;
+          break;
+
+        case 4:
+          let optF = shuffle([p.fonction, ...shuffle(getUniqueVals('fonction').filter(f => f !== p.fonction)).slice(0, 3)]);
+          let optS = shuffle([p.service, ...shuffle(getUniqueVals('service').filter(s => s !== p.service)).slice(0, 3)]);
+
+          html = `
                         <div class="photo-container"><img src="${getAvatar(p.name, p.picture)}" alt="Photo"></div>
                         <div class="question-text">${p.name}</div>
                         <div class="multi-group">
@@ -479,208 +992,209 @@
                             <h3>Son Service ?</h3>
                             <div class="grid-qcm">${optS.map(o => `<button class="btn-option sel-s" onclick="selectGroup(this, 'sel-s')">${o}</button>`).join('')}</div>
                         </div>`;
-                    currentExpectedPts = 2; 
-                    break;
-                    
-                case 5: 
-                case 6:
-                    const isM5 = (currentMode.id === 5); 
-                    const title = isM5 ? target.val.split('|||').join(' - ') : target.val;
-                    let options = shuffle([...donneesAnnuaire]).slice(0, 6);
-                    html = `
+          currentExpectedPts = 2;
+          break;
+
+        case 5:
+        case 6:
+          const isM5 = (currentMode.id === 5);
+          const title = isM5 ? target.val.split('|||').join(' - ') : target.val;
+          let options = shuffle([...donneesAnnuaire]).slice(0, 6);
+          html = `
                         <div class="question-text">Qui correspond à : <br><strong style="color:var(--primary-light)">${title}</strong> ?</div>
                         <div class="grid-cards">`;
-                    
-                    options.forEach(d => { 
-                        html += `
+
+          options.forEach(d => {
+            html += `
                             <div class="card-person" data-id="${d.item.id}" onclick="this.classList.toggle('selected')">
                                 <img src="${getAvatar(d.item.name, d.item.picture)}" alt="Photo"><br>
                                 <strong>${d.item.name}</strong>
-                            </div>`; 
-                    });
-                    html += `</div>`;
-                    
-                    let correctsInCards = options.filter(d => isM5 ? (d.item.fonction+"|||"+d.item.service === target.val) : (d.item.service === target.val)).length;
-                    currentExpectedPts = (correctsInCards === 0 ? 1 : correctsInCards); 
-                    display.dataset.corrects = correctsInCards; 
-                    break;
-                    
-                case 7:
-                    const serv = target.val; 
-                    let listPersons = shuffle([...donneesAnnuaire]);
-                    html = `
+                            </div>`;
+          });
+          html += `</div>`;
+
+          let correctsInCards = options.filter(d => isM5 ? (d.item.fonction + "|||" + d.item.service === target.val) : (d.item.service === target.val)).length;
+          currentExpectedPts = (correctsInCards === 0 ? 1 : correctsInCards);
+          display.dataset.corrects = correctsInCards;
+          break;
+
+        case 7:
+          const serv = target.val;
+          let listPersons = shuffle([...donneesAnnuaire]);
+          html = `
                         <div class="question-text">Qui fait partie du service : <strong style="color:var(--primary-light)">${serv}</strong> ?</div>
                         <div class="checkbox-list">`;
-                    
-                    listPersons.forEach(d => { 
-                        html += `
+
+          listPersons.forEach(d => {
+            html += `
                             <label class="checkbox-item">
                                 <input type="checkbox" value="${d.item.id}"> ${d.item.name}
-                            </label>`; 
-                    });
-                    html += `</div>`;
-                    
-                    let totalCorrects = listPersons.filter(d => d.item.service === serv).length;
-                    currentExpectedPts = (totalCorrects === 0 ? 1 : totalCorrects); 
-                    display.dataset.corrects = totalCorrects; 
-                    break;
-            }
-            display.innerHTML = html; 
-            updateScoreDisplay();
+                            </label>`;
+          });
+          html += `</div>`;
+
+          let totalCorrects = listPersons.filter(d => d.item.service === serv).length;
+          currentExpectedPts = (totalCorrects === 0 ? 1 : totalCorrects);
+          display.dataset.corrects = totalCorrects;
+          break;
+      }
+      display.innerHTML = html;
+      updateScoreDisplay();
+    }
+
+    // --- VALIDATION ET SCORING ---
+    function selectOne(btn) {
+      document.querySelectorAll('.select-one').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function selectGroup(btn, groupClass) {
+      document.querySelectorAll('.' + groupClass).forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function validateAnswer() {
+      const target = questions[currentIndex];
+      let ptsGained = 0;
+      let feedback = "";
+      let p = target.item;
+
+      document.getElementById('btn-validate').classList.add('hidden');
+
+      if (currentMode.id === 1) {
+        const sel = document.querySelector('.select-one.selected');
+        if (!sel) {
+          alert("Sélectionnez une réponse !");
+          document.getElementById('btn-validate').classList.remove('hidden');
+          return;
         }
 
-        // --- VALIDATION ET SCORING ---
-        function selectOne(btn) { 
-            document.querySelectorAll('.select-one').forEach(b => b.classList.remove('selected')); 
-            btn.classList.add('selected'); 
-        }
-        
-        function selectGroup(btn, groupClass) { 
-            document.querySelectorAll('.'+groupClass).forEach(b => b.classList.remove('selected')); 
-            btn.classList.add('selected'); 
-        }
+        document.querySelectorAll('.select-one').forEach(b => {
+          b.disabled = true;
+          if (b.innerText === p.name) b.classList.add('correct');
+          else if (b === sel) b.classList.add('wrong');
+        });
 
-        function validateAnswer() {
-            const target = questions[currentIndex]; 
-            let ptsGained = 0; 
-            let feedback = ""; 
-            let p = target.item;
-            
-            document.getElementById('btn-validate').classList.add('hidden');
-            
-            if (currentMode.id === 1) {
-                const sel = document.querySelector('.select-one.selected'); 
-                if(!sel) {
-                    alert("Sélectionnez une réponse !");
-                    document.getElementById('btn-validate').classList.remove('hidden');
-                    return;
-                }
-                
-                document.querySelectorAll('.select-one').forEach(b => { 
-                    b.disabled = true; 
-                    if(b.innerText === p.name) b.classList.add('correct'); 
-                    else if(b === sel) b.classList.add('wrong'); 
-                });
-                
-                if (sel.innerText === p.name) { 
-                    ptsGained = 1; 
-                }
-                
-            } else if (currentMode.id === 2 || currentMode.id === 3) {
-                const checkField = (id, trueVal) => {
-                    const el = document.getElementById(id); 
-                    el.disabled = true;
-                    if (normalizeStr(el.value) === normalizeStr(trueVal)) { 
-                        el.classList.add('correct'); 
-                        return 1; 
-                    } else { 
-                        el.classList.add('wrong'); 
-                        el.value = el.value ? `${el.value} (Attendu: ${trueVal})` : trueVal; 
-                        return 0; 
-                    }
-                };
-                
-                ptsGained += checkField('inp-prenom', p.firstName); 
-                ptsGained += checkField('inp-nom', p.lastName);
-                
-                if (currentMode.id === 3) { 
-                    ptsGained += checkField('inp-fonction', p.fonction); 
-                    ptsGained += checkField('inp-service', p.service); 
-                    ptsGained += checkField('inp-date', formatDate(p.birthDate)); 
-                }
-                
-            } else if (currentMode.id === 4) {
-                const fSel = document.querySelector('.sel-f.selected'); 
-                const sSel = document.querySelector('.sel-s.selected');
-                
-                if(!fSel || !sSel) {
-                    alert("Sélectionnez une fonction et un service !");
-                    document.getElementById('btn-validate').classList.remove('hidden');
-                    return;
-                }
-
-                document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
-                
-                if(fSel.innerText === p.fonction) { ptsGained++; fSel.classList.add('correct'); } else fSel.classList.add('wrong');
-                if(sSel.innerText === p.service) { ptsGained++; sSel.classList.add('correct'); } else sSel.classList.add('wrong');
-                
-            } else if (currentMode.id === 5 || currentMode.id === 6) {
-                const isM5 = (currentMode.id === 5); 
-                let expectedNum = parseInt(document.getElementById('question-display').dataset.corrects);
-                
-                document.querySelectorAll('.card-person').forEach(c => {
-                    const person = donneesAnnuaire.find(d => d.item.id === parseInt(c.dataset.id)).item;
-                    const isExpected = isM5 ? (person.fonction+"|||"+person.service === target.val) : (person.service === target.val);
-                    const isSelected = c.classList.contains('selected');
-                    
-                    if (isSelected && isExpected) { ptsGained++; c.classList.add('correct'); }
-                    else if (isSelected && !isExpected) c.classList.add('wrong');
-                    else if (!isSelected && isExpected) c.classList.add('missed');
-                });
-                
-                if(expectedNum === 0 && ptsGained === 0) ptsGained = 1; 
-                
-            } else if (currentMode.id === 7) {
-                let emptyValidation = true;
-                let expectedNum = parseInt(document.getElementById('question-display').dataset.corrects);
-
-                document.querySelectorAll('input[type="checkbox"]').forEach(c => {
-                    c.disabled = true; 
-                    const person = donneesAnnuaire.find(d => d.item.id === parseInt(c.value)).item;
-                    const isExpected = (person.service === target.val); 
-                    const isSelected = c.checked;
-                    
-                    if (isSelected || isExpected) emptyValidation = false;
-                    
-                    if (isSelected && isExpected) ptsGained++;
-                    if(isExpected) c.parentElement.style.backgroundColor = "var(--success)";
-                    if(isSelected && !isExpected) c.parentElement.style.backgroundColor = "var(--danger)";
-                });
-                
-                if(expectedNum === 0 && emptyValidation) ptsGained = 1;
-            }
-
-            scoreSession += ptsGained; 
-
-            const isPerfect = (ptsGained === currentExpectedPts);
-            if (!isPerfect) {
-                vies--;
-                feedback = `Aïe, il y a des erreurs ! Vous perdez une vie. 💔`;
-            } else {
-                feedback = `Parfait ! 🎉 (+${ptsGained} pts)`;
-            }
-
-            updateScoreDisplay();
-            
-            const fb = document.getElementById('feedback-container'); 
-            fb.innerText = feedback;
-            fb.className = "feedback-area " + (isPerfect ? "success" : "error"); 
-            fb.classList.remove('hidden');
-            
-            if(vies <= 0) {
-                document.getElementById('btn-next').innerText = "Voir les résultats ➔";
-            } else {
-                document.getElementById('btn-next').innerText = "Suivant ➔";
-            }
-            
-            document.getElementById('btn-next').classList.remove('hidden');
+        if (sel.innerText === p.name) {
+          ptsGained = 1;
         }
 
-        function nextQuestion() { 
-            currentIndex++; 
-            renderQuestion(); 
-        }
-        
-        function updateScoreDisplay() { 
-            document.getElementById('current-score').innerText = scoreSession; 
-            
-            let hearts = "";
-            for(let i = 0; i < vies; i++) hearts += "❤️";
-            for(let i = vies; i < 3; i++) hearts += "🖤"; 
-            document.getElementById('lives-display').innerText = hearts;
+      } else if (currentMode.id === 2 || currentMode.id === 3) {
+        const checkField = (id, trueVal) => {
+          const el = document.getElementById(id);
+          el.disabled = true;
+          if (normalizeStr(el.value) === normalizeStr(trueVal)) {
+            el.classList.add('correct');
+            return 1;
+          } else {
+            el.classList.add('wrong');
+            el.value = el.value ? `${el.value} (Attendu: ${trueVal})` : trueVal;
+            return 0;
+          }
+        };
+
+        ptsGained += checkField('inp-prenom', p.firstName);
+        ptsGained += checkField('inp-nom', p.lastName);
+
+        if (currentMode.id === 3) {
+          ptsGained += checkField('inp-fonction', p.fonction);
+          ptsGained += checkField('inp-service', p.service);
+          ptsGained += checkField('inp-date', formatDate(p.birthDate));
         }
 
-        window.onload = fetchEncryptedFile;
-    </script>
+      } else if (currentMode.id === 4) {
+        const fSel = document.querySelector('.sel-f.selected');
+        const sSel = document.querySelector('.sel-s.selected');
+
+        if (!fSel || !sSel) {
+          alert("Sélectionnez une fonction et un service !");
+          document.getElementById('btn-validate').classList.remove('hidden');
+          return;
+        }
+
+        document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
+
+        if (fSel.innerText === p.fonction) { ptsGained++; fSel.classList.add('correct'); } else fSel.classList.add('wrong');
+        if (sSel.innerText === p.service) { ptsGained++; sSel.classList.add('correct'); } else sSel.classList.add('wrong');
+
+      } else if (currentMode.id === 5 || currentMode.id === 6) {
+        const isM5 = (currentMode.id === 5);
+        let expectedNum = parseInt(document.getElementById('question-display').dataset.corrects);
+
+        document.querySelectorAll('.card-person').forEach(c => {
+          const person = donneesAnnuaire.find(d => d.item.id === parseInt(c.dataset.id)).item;
+          const isExpected = isM5 ? (person.fonction + "|||" + person.service === target.val) : (person.service === target.val);
+          const isSelected = c.classList.contains('selected');
+
+          if (isSelected && isExpected) { ptsGained++; c.classList.add('correct'); }
+          else if (isSelected && !isExpected) c.classList.add('wrong');
+          else if (!isSelected && isExpected) c.classList.add('missed');
+        });
+
+        if (expectedNum === 0 && ptsGained === 0) ptsGained = 1;
+
+      } else if (currentMode.id === 7) {
+        let emptyValidation = true;
+        let expectedNum = parseInt(document.getElementById('question-display').dataset.corrects);
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(c => {
+          c.disabled = true;
+          const person = donneesAnnuaire.find(d => d.item.id === parseInt(c.value)).item;
+          const isExpected = (person.service === target.val);
+          const isSelected = c.checked;
+
+          if (isSelected || isExpected) emptyValidation = false;
+
+          if (isSelected && isExpected) ptsGained++;
+          if (isExpected) c.parentElement.style.backgroundColor = "var(--success)";
+          if (isSelected && !isExpected) c.parentElement.style.backgroundColor = "var(--danger)";
+        });
+
+        if (expectedNum === 0 && emptyValidation) ptsGained = 1;
+      }
+
+      scoreSession += ptsGained;
+
+      const isPerfect = (ptsGained === currentExpectedPts);
+      if (!isPerfect) {
+        vies--;
+        feedback = `Aïe, il y a des erreurs ! Vous perdez une vie. 💔`;
+      } else {
+        feedback = `Parfait ! 🎉 (+${ptsGained} pts)`;
+      }
+
+      updateScoreDisplay();
+
+      const fb = document.getElementById('feedback-container');
+      fb.innerText = feedback;
+      fb.className = "feedback-area " + (isPerfect ? "success" : "error");
+      fb.classList.remove('hidden');
+
+      if (vies <= 0) {
+        document.getElementById('btn-next').innerText = "Voir les résultats ➔";
+      } else {
+        document.getElementById('btn-next').innerText = "Suivant ➔";
+      }
+
+      document.getElementById('btn-next').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      renderQuestion();
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('current-score').innerText = scoreSession;
+
+      let hearts = "";
+      for (let i = 0; i < vies; i++) hearts += "❤️";
+      for (let i = vies; i < 3; i++) hearts += "🖤";
+      document.getElementById('lives-display').innerText = hearts;
+    }
+
+    window.onload = fetchEncryptedFile;
+  </script>
 </body>
+
 </html>

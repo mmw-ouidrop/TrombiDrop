@@ -418,7 +418,7 @@
     // UTILITIES
     // ==========================================
     function getAvatar(p) {
-      if (p.picture) return p.picture;
+      if (p.picture) return `./pictures/${p.picture}`;
       const initials = `${p.firstName.charAt(0)}${p.lastName.charAt(0)}`.toUpperCase();
       const colors = ['20294E', '2d3868', '1d7c5e', '3a7abf', '8b5a2b', '5a3e7a', '2d6e4e', '3d5a8a', '5e3a3a'];
       const color = colors[p.id % colors.length];
